@@ -56,10 +56,9 @@ function Vendas() {
 
     const venda = {
       cliente_id: clienteSelecionado,
-      itens: carrinho.map(item => ({
+      produtos: carrinho.map(item => ({
         produto_id: item.id,
         quantidade: item.quantidade,
-        preco_unitario: item.preco
       }))
     };
 

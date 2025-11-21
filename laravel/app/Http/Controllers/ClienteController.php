@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Clientes;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Type\Integer;
+use App\Models\Clientes;
+use Illuminate\Support\Facades\DB;
 
 class ClienteController extends Controller
 {
@@ -13,7 +13,7 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        return Clientes::all();
+        return response()->json(Clientes::orderBy ("id","desc")->get());
     }
 
     /**
@@ -21,38 +21,36 @@ class ClienteController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'cpf' => 'required|integer|unique:clientes,cpf',
-            'telefone' => 'nullable|string|max:20',
-            'endereco' => 'nullable|string|max:255',
-        ]);
+        $clientes = Clientes::create($request->all() );
+        return response()->json($clientes, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Clientes $clientes)
+    public function show(string $id)
     {
-        return $clientes;
+        $cliente = Clientes::findOrFail($id);
+        return response()->json($cliente);
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Clientes $clientes)
+    public function update(Request $request, string $id)
     {
+        $clientes = Clientes::findOrFail($id);
         $clientes->update($request->all());
-        return $clientes;
+        return response()->json($clientes);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Clientes $clientes)
+    public function destroy(string $id)
     {
-        $clientes->delete();
+        Clientes::destroy($id);
         return response()->noContent();
     }
 }

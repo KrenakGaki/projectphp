@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Produtos;
 use Illuminate\Http\Request;
+use App\Models\Produtos;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProdutoController extends Controller
 {
@@ -12,7 +13,7 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        return Produtos::all();
+        return response()->json(Produtos::orderBy('id', 'desc')->get());
     }
 
     /**
@@ -23,35 +24,58 @@ class ProdutoController extends Controller
         $data = $request->validate([
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string',
+            'preco' => 'required|numeric|min:0',
             'quantidade' => 'required|integer|min:0',
-            'preco_custo' => 'required|numeric|min:0',
-            'preco_venda' => 'required|numeric|min:0',
         ]);
+        $produto = Produtos::create($data);
+        return response()->json($produto, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Produtos $produtos)
+    public function show(string $id)
     {
-        return $produtos;
+        $produto = Produtos::find($id);
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+    }
+        return response()->json($produto);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Produtos $produtos)
+    public function update(Request$request, string $id)
     {
-        $produtos->update($request->all());
-        return $produtos;
+        $produto = Produtos::find($id);
+
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+        $data = $request->validate([
+            'nome' => 'sometimes|string|max:255',
+            'descricao' => 'sometimes|nullable|string',
+            'preco' => 'sometimes|numeric|min:0',
+            'quantidade' => 'sometimes|integer|min:0',
+        ]);
+
+        $produto->update($data);
+        return response()->json($produto);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Produtos $produtos)
+    public function destroy(string $id)
     {
-        $produtos->delete();
-        return response()->noContent();
+        $produto = Produtos::find($id);
+
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+    }
+
+    $produto->delete();
+    return response()->json(['message' => 'O produto foi removido!']);
     }
 }

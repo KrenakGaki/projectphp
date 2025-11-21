@@ -2,8 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ControleProdutoController;
-use App\Http\Controllers\ControleClienteController;
+use App\Http\Controllers\VendaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ClienteController;
@@ -13,12 +12,11 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('produtos', [ProdutoController::class]);
-Route::get('/produtos', [ControleProdutoController::class, 'index']);
-Route::post('/produtos', [ControleProdutoController::class, 'store']);
-Route::get('/produtos/{id}', [ControleProdutoController::class, 'show']);
-Route::put('/produtos/{id}', [ControleProdutoController::class, 'update']);
-Route::delete('/produtos/{id}', [ControleProdutoController::class, 'destroy']);
+Route::get('/produtos', [ProdutoController::class, 'index']);
+Route::post('/produtos', [ProdutoController::class, 'store']);
+Route::get('/produtos/{id}', [ProdutoController::class, 'show']);
+Route::put('/produtos/{id}', [ProdutoController::class, 'update']);
+Route::delete('/produtos/{id}', [ProdutoController::class, 'destroy']);
 
 
 // routes/web.php
@@ -27,16 +25,21 @@ Route::get('/sanctum/csrf-cookie', function () {
 });
 
 
+// Vendas
+Route::get('/vendas', [VendaController::class, 'index']);
+Route::post('/vendas', [VendaController::class, 'store']);
+Route::get('/vendas/{id}', [VendaController::class, 'show']);
+Route::delete('/vendas/{id}', [VendaController::class, 'destroy']);
+
 
 // Clientes
-Route::get('/clientes', [ControleClienteController::class, 'index']);
-Route::post('/clientes', [ControleClienteController::class, 'store']);
-Route::get('/clientes/{id}', [ControleClienteController::class, 'show']);
-Route::put('/clientes/{id}', [ControleClienteController::class, 'update']);
-Route::delete('/clientes/{id}', [ControleClienteController::class, 'destroy']);
+Route::get('/clientes', [ClienteController::class, 'index']);
+Route::post('/clientes', [ClienteController::class, 'store']);
+Route::get('/clientes/{id}', [ClienteController::class, 'show']);
+Route::put('/clientes/{id}', [ClienteController::class, 'update']);
+Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
 
 // Rotas de autenticação
-
 Route::Post('/register', [App\Http\Controllers\AuthController::class, 'register']);
 Route::Post('/login', [App\Http\Controllers\AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->get('/perfil', [App\Http\Controllers\AuthController::class, 'perfil']);

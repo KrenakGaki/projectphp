@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, X, Users, Phone, FileText, MapPin, ArrowLeftCircle } from 'lucide-react';
@@ -22,13 +23,14 @@ function Clientes() {
     const voltarAoDashboard = () => {
       navigate('/dashboard');
     };
+    // Buscar clientes ao carregar
+useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
+    buscarClientes();
+}, []);
+    
 
-  // Buscar clientes ao carregar
-  useEffect(() => {
-    buscarCliente();
-  }, []);
-
-  const buscarCliente = () => {
+  const buscarClientes = () => {
     setLoading(true);
     api.get('/clientes')
       .then(response => {
@@ -42,6 +44,8 @@ function Clientes() {
         setLoading(false);
       });
   };
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -77,9 +81,9 @@ function Clientes() {
     setEditando(null);
   };
 
-  const handleEdit = (cliente) => {
-    setFormData(cliente);
-    setEditando(cliente);
+  const handleEdit = (clientes) => {
+    setFormData(clientes);
+    setEditando(clientes);
     setShowModal(true);
   };
 
@@ -97,7 +101,7 @@ function Clientes() {
     }
   };
 
-  // Loading bonito
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-100 flex items-center justify-center">

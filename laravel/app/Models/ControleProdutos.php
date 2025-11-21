@@ -14,6 +14,7 @@ class ControleProdutos extends Model
         'user_id',
     ];
 
+    // Link com o modelo Produtos e User
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);

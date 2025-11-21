@@ -16,7 +16,7 @@ function Dashboard() {
     //Armazenar dados
     const [clientes, setClientes] = useState([]);
     const [produtos, setProdutos] = useState([]);
-    const [vendas, setVendas] = useState([]);
+
 
 
     console.log('Usuário:', user);

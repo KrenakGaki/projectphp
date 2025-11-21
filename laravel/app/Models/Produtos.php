@@ -14,6 +14,8 @@ class Produtos extends Model
         'preco_venda',
     ];
 
+
+    // Link com o modelo ControleProdutos
     public function movimentacao() {
         return $this->hasmany(ControleProdutos::class, 'produto_id');
     }

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Plus, Package, Edit2, Trash2, X, Search, TrendingUp, AlertCircle, ArrowLeftCircle } from "lucide-react";
 import api from '../services/api';
 
+// Componentes Principais
 function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,10 +17,8 @@ function Produtos() {
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
-    quantidade: 0,
+    quantidade: "",
     preco_venda: "",
-    categoria: "",
-    fornecedor: "",
   });
 
   // Voltar ao Dashboard
@@ -28,7 +28,7 @@ function Produtos() {
       navigate('/dashboard');
     };
 
-    const buscarProdutos = () => {
+  const buscarProdutos = () => {
     api.get('/produtos').then(res => setProdutos(res.data));
   };
 
@@ -46,11 +46,13 @@ function Produtos() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.preco || !formData.quantidade) {
+    if (!formData.nome || !formData.preco_venda || !formData.quantidade) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
+
+ // Chamando dados da API
     const dadosParaEnviar = {
       id: editando ? editando.id : crypto.randomUUID(),
       nome: formData.nome,
@@ -66,11 +68,11 @@ function Produtos() {
           await api.put(`/produtos/${editando.id}`, dadosParaEnviar);
           alert("Produto atualizado com sucesso!");
         } else {
-          await api.post(`/produtos/${editando.id}`, dadosParaEnviar);
-          alert("Produto cadastrado com sucesso!");
+          await api.post('/produtos', dadosParaEnviar);
+          alert("Produto cadastrado com sucesso!"); 
         }
     
-        buscarProdutos();    
+        buscarProdutos();   
         resetForm();
 
 
@@ -88,8 +90,6 @@ function Produtos() {
       descricao: "",
       quantidade: "",
       preco_venda: "",
-      categoria: "",
-      fornecedor: "",
     });
     setShowModal(false);
     setEditando(null);
@@ -100,18 +100,21 @@ function Produtos() {
       nome: produto.nome,
       descricao: produto.descricao || "",
       quantidade: produto.quantidade.toString(),
-      preco: produto.preco_venda.toString(),
-      categoria: produto.categoria || "",
-      fornecedor: produto.fornecedor || "",
+      preco_venda: Number(produto.preco_venda).toFixed(2),
     });
     setEditando(produto);
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Deseja realmente excluir este produto?")) {
-      setProdutos(prev => prev.filter(p => p.id !== id));
-      alert("Produto deletado com sucesso!");
+  const handleDelete = async (id) => {
+    if (!window.confirm("Tem certeza que deseja excluir este produto?")) return;
+
+    try {
+      await api.delete(`/produtos/${id}`);
+      await buscarProdutos();
+      alert("Produto excluído com sucesso!");
+    } catch (err) {
+      alert("Erro ao excluir produto.");
     }
   };
 
@@ -388,7 +391,7 @@ function Produtos() {
                   </label>
                   <input
                     type="number"
-                    name="preco"
+                    name="preco_venda"
                     value={formData.preco_venda}
                     onChange={handleInputChange}
                     required
@@ -414,34 +417,6 @@ function Produtos() {
                     placeholder="0"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Categoria
-                </label>
-                <input
-                  type="text"
-                  name="categoria"
-                  value={formData.categoria}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Ex: Eletrônicos, Periféricos, etc."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Fornecedor
-                </label>
-                <input
-                  type="text"
-                  name="fornecedor"
-                  value={formData.fornecedor}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Nome do fornecedor"
-                />
               </div>
 
               <div className="flex gap-3 pt-6">
