@@ -9,7 +9,8 @@ function Login() {
     const [error,setError] = useState('');
     const [loading,setLoading] = useState(false);
 
-    const {login} = useAuth();
+    const { login, loading: authLoading }  = useAuth();
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -77,10 +78,10 @@ return (
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || authLoading}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold shadow-lg transition-all disabled:opacity-50"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading || authLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>

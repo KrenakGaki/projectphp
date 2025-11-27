@@ -4,11 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {useState, useEffect} from 'react';
 
-
-
 // Formação do Dashboard
 function Dashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const [loading,setLoading] = useState();
     const [error,setError] = useState();
@@ -18,8 +16,8 @@ function Dashboard() {
     const [produtos, setProdutos] = useState([]);
     const [vendas, setVendas] = useState([]);
 
-
     console.log('Usuário:', user);
+    console.log('É Admin:', isAdmin());
 
     const handleLogout = async () => {
         await logout();
@@ -34,13 +32,13 @@ function Dashboard() {
                 const[resClientes, resProdutos, resVendas] = await Promise.all([
                     api.get('/clientes'),
                     api.get('/produtos'),
-                    api.get('/vendas'),
+                    api.get('/vendas')
                 ]);
 
                 setClientes(resClientes.data);
                 setProdutos(resProdutos.data);
                 setVendas(resVendas.data);
-            }
+        }
         catch (error) {
             console.error('Erro ao carregar dados', error);
             setError('Erro ao carregar dados do Dashboard');
@@ -54,10 +52,6 @@ function Dashboard() {
     //Contagem
     const totalClientes = clientes.length;
     const totalProdutos = produtos.length;
-    const totalVendas = vendas.length;
-
-
-    
 
     if (!user) {
         return (
@@ -82,10 +76,10 @@ function Dashboard() {
         );
     }
 
+//Frontend
 return (
     <div className="min-h-screen bg-gray-100">
 
-        {/* HEADER PREMIUM CINZA – EXATAMENTE IGUAL ÀS OUTRAS PÁGINAS */}
         <div className="bg-white shadow-lg border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -99,6 +93,7 @@ return (
                     </h1>
                     <p className="text-sm text-gray-500 mt-0.5">
                     Bem-vindo de volta, <span className="font-semibold text-gray-700">{user.name}</span>
+                    {isAdmin() && <span className="ml-2 px-2 py-1 bg-purple-600 text-white text-xs rounded-full">ADMIN</span>}
                     </p>
                 </div>
                 </div>
@@ -114,7 +109,7 @@ return (
             </div>
         </div>
 
-        {/* CONTEÚDO PRINCIPAL */}
+        {/* Principal */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
             {/* Cards de Estatísticas */}
@@ -147,7 +142,7 @@ return (
                 <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm text-gray-600 font-medium">Vendas Hoje</p>
-                    <p className="text-3xl font-bold text-gray-800">{totalVendas}</p>
+                    <p className="text-3xl font-bold text-gray-800">45</p>
                 </div>
                 <div className="p-4 bg-green-100 rounded-xl">
                     <ShoppingCart className="w-10 h-10 text-green-600" />
@@ -158,7 +153,7 @@ return (
 
             {/* Acesso Rápido */}
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Acesso Rápido</h2>
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
 
             <button
                 onClick={() => navigate('/vendas')}
@@ -187,14 +182,35 @@ return (
                 <p className="text-sm opacity-90">Gerenciar clientes</p>
             </button>
 
-            <button
-                onClick={() => alert('Em desenvolvimento')}
-                className="bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center"
-            >
-                <FileText className="w-12 h-12 mb-3" />
-                <p className="font-bold text-lg">Usuários</p>
-                <p className="text-sm opacity-90">Em breve</p>
-            </button>
+            {/* Botão Usuários - APENAS PARA ADMIN */}
+            {isAdmin() && (
+                <button
+                    onClick={() => navigate('/usuarios')}
+                    className="bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center relative"
+                >
+                    <div className="absolute top-2 right-2 bg-yellow-400 text-indigo-900 text-xs px-2 py-0.5 rounded-full font-bold">
+                        ADMIN
+                    </div>
+                    <FileText className="w-12 h-12 mb-3" />
+                    <p className="font-bold text-lg">Usuários</p>
+                    <p className="text-sm opacity-90">Gerenciar usuários</p>
+                </button>
+            )}
+
+            {/* Botão Configurações - APENAS PARA ADMIN */}
+            {isAdmin() && (
+                <button
+                    onClick={() => navigate('/configuracoes')}
+                    className="bg-gradient-to-br from-gray-500 to-gray-700 hover:from-gray-600 hover:to-gray-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center relative"
+                >
+                    <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs px-2 py-0.5 rounded-full font-bold">
+                        ADMIN
+                    </div>
+                    <Settings className="w-12 h-12 mb-3" />
+                    <p className="font-bold text-lg">Configurações</p>
+                    <p className="text-sm opacity-90">Configurações do sistema</p>
+                </button>
+            )}
 
             </div>
 
@@ -204,6 +220,13 @@ return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
                 <p><span className="font-semibold">Nome:</span> {user.name}</p>
                 <p><span className="font-semibold">Email:</span> {user.email}</p>
+                <p><span className="font-semibold">Tipo:</span> 
+                    <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold ${
+                        isAdmin() ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                        {isAdmin() ? 'Administrador' : 'Usuário'}
+                    </span>
+                </p>
             </div>
             </div>
 

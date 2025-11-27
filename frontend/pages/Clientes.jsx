@@ -134,11 +134,11 @@ useEffect(() => {
                   </div>
                 </div>
                 <button
-                      onClick={() => navigate('/dashboard')}
+                      onClick={voltarAoDashboard}
                       className="fixed top-5 left-5 z-50 flex items-center gap-2.5 bg-white border-2 border-gray-300 text-gray-800 px-5 py-3 rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:border-gray-400 hover:bg-gray-50 transform hover:scale-110 transition-all duration-300 group"
                     >
                       <ArrowLeftCircle className="w-7 h-7 text-blue-600 group-hover:text-blue-700 transition-colors" />
-                      <span className="hidden sm:block">Dashboard</span>
+                      <span className="hidden sm:inline">Dashboard</span>
                 </button>
                 <button
                 onClick={() => setShowModal(true)}

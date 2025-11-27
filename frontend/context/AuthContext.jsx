@@ -3,7 +3,7 @@ import api from '../services/api';
 
 const AuthContext = createContext({});
 
-export function AuthProvider({children}) {
+const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -74,10 +74,19 @@ export function AuthProvider({children}) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{
+            user,
+            login,
+            logout,
+            loading,
+            
+            isAdmin: () => user?.type === 'admin',
+            isUser: () => user?.type === 'user' || user?.type === null || user?.type === undefined
+        }}>
             {children}
         </AuthContext.Provider>
-    );
+);
 }
 
+export {AuthProvider};
 export default AuthContext;
