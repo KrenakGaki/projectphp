@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import useAuth from '../context/AuthContext';
 import {LogIn} from 'lucide-react';
 
 function Login() {
@@ -12,6 +12,7 @@ function Login() {
     const { login, loading: authLoading }  = useAuth();
 
     const navigate = useNavigate();
+    const auth = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,6 +20,7 @@ function Login() {
         setLoading(true);
 
         try {
+            const {login} = auth;
             await login(email, password);
             navigate('/dashboard');
         } catch (err) {

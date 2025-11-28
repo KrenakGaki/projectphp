@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Suporte da API
         $middleware->api(prepend: [EnsureFrontendRequestsAreStateful::class]);
 
+        $middleware->validateCsrfTokens(except: [
+        'api/*',  // ← Isso deve estar aqui
+    ]);
+
         // Registro do middleware
         $middleware->alias([
             'admin' => \App\Http\Middleware\CheckAdmin::class,

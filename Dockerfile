@@ -40,3 +40,4 @@ EXPOSE 80
 
 # Comando padrão
 CMD ["apache2-foreground"]
+

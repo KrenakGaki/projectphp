@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ShoppingCart, Package, CheckCircle, AlertCircle, XCircle, ArrowLeftCircle } from 'lucide-react';
 import api from '../services/api';
+import useAuth from '../context/AuthContext';
 
 function Vendas() {
   const [produtos, setProdutos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [carrinho, setCarrinho] = useState([]);
-  const [clienteSelecionado, setClienteSelecionado] = useState('');
-  const [carregando, setCarregando] = useState(false);
   const [busca, setBusca] = useState('');
   const [notificacao, setNotificacao] = useState(null);
+  const [clienteSelecionado, setClienteSelecionado] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   // Função para mostrar notificações
   const mostrarNotificacao = (mensagem, tipo = 'info') => {
@@ -27,23 +28,23 @@ function Vendas() {
         setProdutos(res.data);
       })
       .catch(err => {
-        console.error('Erro ao buscar produtos:', err);
-        mostrarNotificacao('Erro ao carregar produtos', 'error');
+        console.error('Erro ao buscar produtos:', err)
       });
   };
-
+  
+  
   const buscarClientes = () => {
     api.get('/clientes')
-      .then(res => {
+      .then (res => {
         console.log('Clientes recebidos:', res.data);
         setClientes(res.data);
       })
-      .catch(err => {
-        console.error('Erro ao buscar clientes:', err);
-        mostrarNotificacao('Erro ao carregar clientes', 'error');
-      });
+      .catch (err => {
+        console.error('Erro ao buscar clientes:', err)
+    });
   };
 
+  // Adicionar produto ao carrinho
   const adicionarAoCarrinho = (produto) => {
     const itemExistente = carrinho.find(item => item.id === produto.id);
     const estoqueDisponivel = produto.quantidade || 0;
@@ -73,12 +74,14 @@ function Vendas() {
     }
   };
 
+  // Remover produto do carrinho
   const removerDoCarrinho = (id) => {
     const produto = carrinho.find(item => item.id === id);
     setCarrinho(carrinho.filter(item => item.id !== id));
     mostrarNotificacao(`${produto.nome} removido do carrinho`, 'info');
   };
 
+  // Alterar quantidade de um produto no carrinho
   const alterarQuantidade = (id, novaQuantidade) => {
     const produto = produtos.find(p => p.id === id);
     const estoqueDisponivel = produto?.quantidade || 0;
@@ -98,6 +101,7 @@ function Vendas() {
     ));
   };
 
+  // Buscar produtos e clientes ao carregar o componente
   useEffect(() => {
     buscarProdutos();
     buscarClientes();

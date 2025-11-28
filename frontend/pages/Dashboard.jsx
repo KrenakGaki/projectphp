@@ -1,11 +1,12 @@
-import { Package, Users, ShoppingCart, TrendingUp, Settings, FileText, LogOut, Home } from 'lucide-react';
-import useAuth from '../hooks/useAuth';
+import { Package, Users, ShoppingCart, FileText, LogOut, Home } from 'lucide-react';
+import useAuth from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {useState, useEffect} from 'react';
 
 // Formação do Dashboard
 function Dashboard() {
+    const auth = useAuth();
     const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const [loading,setLoading] = useState();
@@ -32,12 +33,14 @@ function Dashboard() {
                 const[resClientes, resProdutos, resVendas] = await Promise.all([
                     api.get('/clientes'),
                     api.get('/produtos'),
-                    api.get('/vendas')
+                    api.get('/vendas'),
+              //      api.get('/usuarios')
                 ]);
 
                 setClientes(resClientes.data);
                 setProdutos(resProdutos.data);
                 setVendas(resVendas.data);
+               // setUsuarios(resUsuarios.data);
         }
         catch (error) {
             console.error('Erro ao carregar dados', error);
@@ -52,6 +55,7 @@ function Dashboard() {
     //Contagem
     const totalClientes = clientes.length;
     const totalProdutos = produtos.length;
+    const totalVendas = vendas.length;
 
     if (!user) {
         return (
@@ -142,7 +146,7 @@ return (
                 <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm text-gray-600 font-medium">Vendas Hoje</p>
-                    <p className="text-3xl font-bold text-gray-800">45</p>
+                    <p className="text-3xl font-bold text-gray-800">{totalVendas}</p>
                 </div>
                 <div className="p-4 bg-green-100 rounded-xl">
                     <ShoppingCart className="w-10 h-10 text-green-600" />
@@ -153,7 +157,7 @@ return (
 
             {/* Acesso Rápido */}
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Acesso Rápido</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
             <button
                 onClick={() => navigate('/vendas')}
@@ -182,35 +186,15 @@ return (
                 <p className="text-sm opacity-90">Gerenciar clientes</p>
             </button>
 
-            {/* Botão Usuários - APENAS PARA ADMIN */}
-            {isAdmin() && (
-                <button
-                    onClick={() => navigate('/usuarios')}
-                    className="bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center relative"
-                >
-                    <div className="absolute top-2 right-2 bg-yellow-400 text-indigo-900 text-xs px-2 py-0.5 rounded-full font-bold">
-                        ADMIN
-                    </div>
-                    <FileText className="w-12 h-12 mb-3" />
-                    <p className="font-bold text-lg">Usuários</p>
-                    <p className="text-sm opacity-90">Gerenciar usuários</p>
-                </button>
-            )}
+            <button
+                onClick={() => navigate('/usuarios')}
+                className="bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center relative"
+            >
+                <FileText className="w-12 h-12 mb-3" />
+                <p className="font-bold text-lg">Usuários</p>
+                <p className="text-sm opacity-90">Gerenciar usuários</p>
+            </button>
 
-            {/* Botão Configurações - APENAS PARA ADMIN */}
-            {isAdmin() && (
-                <button
-                    onClick={() => navigate('/configuracoes')}
-                    className="bg-gradient-to-br from-gray-500 to-gray-700 hover:from-gray-600 hover:to-gray-800 text-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center relative"
-                >
-                    <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs px-2 py-0.5 rounded-full font-bold">
-                        ADMIN
-                    </div>
-                    <Settings className="w-12 h-12 mb-3" />
-                    <p className="font-bold text-lg">Configurações</p>
-                    <p className="text-sm opacity-90">Configurações do sistema</p>
-                </button>
-            )}
 
             </div>
 

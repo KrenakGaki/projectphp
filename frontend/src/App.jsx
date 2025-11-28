@@ -5,9 +5,11 @@ import Dashboard from "../pages/Dashboard";
 import Clientes from "../pages/Clientes";
 import Produtos from "../pages/Produtos";
 import Vendas from "../pages/Vendas";
+import Usuarios from "../pages/Usuarios";
 
 import PrivateRoute from "../components/PrivateRoute";
 import Layout from "../components/Layout";
+
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/vendas" element={<Vendas />} />
+            <Route path="/usuarios" element={<Usuarios />} />
           </Route>
         </Routes>
       </BrowserRouter>

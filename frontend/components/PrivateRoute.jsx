@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import useAuth from '../context/AuthContext';
 
 function PrivateRoute() {
-    const { user, loading } = useAuth();
+    const auth = useAuth();
+    const { user, loading } = auth;
 
     // Enquanto está carregando, mostra tela de loading
     if (loading) {

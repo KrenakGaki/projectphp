@@ -45,7 +45,7 @@ function Produtos() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // CORRIGIDO: Removida duplicação
+  // Salvar produto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -272,7 +272,9 @@ function Produtos() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {produtosFiltrados.map((produto) => (
+            {[...produtos]
+            .sort((a, b) => a.nome.localeCompare(b.nome))
+              .map((produto) => (
               <div key={produto.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group">
                 <div className="h-2 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500"></div>
                 <div className="p-6">
