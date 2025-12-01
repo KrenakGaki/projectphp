@@ -4,17 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Venda extends Model
+class Sale extends Model
 {
+
+    protected $table = "sale";
+
+
     protected $fillable = [
         'cliente_id',
         'total',
-        'data_venda',
+        'data_Sale',
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
-        'data_venda' => 'datetime'
+        'data_sale' => 'datetime'
         ];
 
 
@@ -22,12 +26,12 @@ class Venda extends Model
 
     public function cliente()
     {
-        return $this->belongsTo(Clientes::class);
+        return $this->belongsTo(Customer::class);
 
     }
 
     public function itens() {
-        return $this->hasMany(VendaItem::class);
+        return $this->hasMany(SaleProduct::class);
     }
 }
 

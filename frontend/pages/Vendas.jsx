@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ShoppingCart, Package, CheckCircle, AlertCircle, XCircle, ArrowLeftCircle } from 'lucide-react';
 import api from '../services/api';
-import useAuth from '../context/AuthContext';
 
 function Vendas() {
   const [produtos, setProdutos] = useState([]);
@@ -13,7 +12,6 @@ function Vendas() {
   const [clienteSelecionado, setClienteSelecionado] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // Função para mostrar notificações
   const mostrarNotificacao = (mensagem, tipo = 'info') => {
     setNotificacao({ mensagem, tipo });
     setTimeout(() => setNotificacao(null), 4000);
@@ -32,7 +30,6 @@ function Vendas() {
       });
   };
   
-  
   const buscarClientes = () => {
     api.get('/clientes')
       .then (res => {
@@ -44,19 +41,18 @@ function Vendas() {
     });
   };
 
-  // Adicionar produto ao carrinho
   const adicionarAoCarrinho = (produto) => {
     const itemExistente = carrinho.find(item => item.id === produto.id);
-    const estoqueDisponivel = produto.quantidade || 0;
+    const estoqueDisponivel = produto.quantity || 0;
     
     if (itemExistente) {
-      if (itemExistente.quantidade < estoqueDisponivel) {
+      if (itemExistente.quantity < estoqueDisponivel) {
         setCarrinho(carrinho.map(item =>
           item.id === produto.id
-            ? { ...item, quantidade: item.quantidade + 1 }
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         ));
-        mostrarNotificacao(`${produto.nome} adicionado novamente!`, 'success');
+        mostrarNotificacao(`${produto.name} adicionado novamente!`, 'success');
       } else {
         mostrarNotificacao('Estoque insuficiente!', 'warning');
       }
@@ -64,27 +60,25 @@ function Vendas() {
       if (estoqueDisponivel > 0) {
         setCarrinho([...carrinho, { 
           ...produto, 
-          quantidade: 1,
-          preco_unitario: produto.preco_venda
+          quantity: 1,
+          preco_unitario: produto.sale_price
         }]);
-        mostrarNotificacao(`${produto.nome} adicionado ao carrinho!`, 'success');
+        mostrarNotificacao(`${produto.name} adicionado ao carrinho!`, 'success');
       } else {
         mostrarNotificacao('Produto sem estoque!', 'error');
       }
     }
   };
 
-  // Remover produto do carrinho
   const removerDoCarrinho = (id) => {
     const produto = carrinho.find(item => item.id === id);
     setCarrinho(carrinho.filter(item => item.id !== id));
-    mostrarNotificacao(`${produto.nome} removido do carrinho`, 'info');
+    mostrarNotificacao(`${produto.name} removido do carrinho`, 'info');
   };
 
-  // Alterar quantidade de um produto no carrinho
   const alterarQuantidade = (id, novaQuantidade) => {
     const produto = produtos.find(p => p.id === id);
-    const estoqueDisponivel = produto?.quantidade || 0;
+    const estoqueDisponivel = produto?.quantity || 0;
 
     if (novaQuantidade < 1) {
       removerDoCarrinho(id);
@@ -97,11 +91,10 @@ function Vendas() {
     }
 
     setCarrinho(carrinho.map(item =>
-      item.id === id ? { ...item, quantidade: novaQuantidade } : item
+      item.id === id ? { ...item, quantity: novaQuantidade } : item
     ));
   };
 
-  // Buscar produtos e clientes ao carregar o componente
   useEffect(() => {
     buscarProdutos();
     buscarClientes();
@@ -121,10 +114,13 @@ function Vendas() {
     setCarregando(true);
 
     const dadosVenda = {
-      cliente_id: parseInt(clienteSelecionado),
-      produtos: carrinho.map(item => ({
-        produto_id: item.id,
-        quantidade: item.quantidade
+      customer_id: parseInt(clienteSelecionado),
+      total: total,
+      status: 'pending',
+      products: carrinho.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.preco_unitario
       }))
     };
 
@@ -142,11 +138,8 @@ function Vendas() {
       
       mostrarNotificacao(`Venda realizada com sucesso! Total: R$ ${total.toFixed(2)}`, 'success');
       
-      // Limpar carrinho e cliente
       setCarrinho([]);
       setClienteSelecionado('');
-      
-      // Atualizar produtos para refletir novo estoque
       buscarProdutos();
       
     } catch (err) {
@@ -172,15 +165,13 @@ function Vendas() {
 
   const total = carrinho.reduce((acc, item) => {
     const preco = parseFloat(item.preco_unitario || 0);
-    return acc + (preco * item.quantidade);
+    return acc + (preco * item.quantity);
   }, 0);
 
-  // Filtrar produtos por busca
-  const produtosFiltrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
+  const produtosFiltrados = produtos.filter(product =>
+    product.name?.toLowerCase().includes(busca.toLowerCase())
   );
 
-  // Componente de Notificação
   const Notificacao = () => {
     if (!notificacao) return null;
 
@@ -218,7 +209,6 @@ function Vendas() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Notificacao />
       
-      {/* Cabeçalho */}
       <div className="bg-white shadow-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -233,7 +223,7 @@ function Vendas() {
                 <p className="text-sm text-gray-500 mt-0.5">Sistema rápido de vendas</p>
               </div>
             </div>
-                        <button
+            <button
               onClick={() => navigate('/dashboard')}
               className="fixed top-5 left-5 z-50 flex items-center gap-2.5 bg-white border-2 border-gray-300 text-gray-800 px-5 py-3 rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:border-gray-400 hover:bg-gray-50 transform hover:scale-110 transition-all duration-300 group"
             >
@@ -252,7 +242,6 @@ function Vendas() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Produtos Disponíveis */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
@@ -261,7 +250,6 @@ function Vendas() {
               </h2>
             </div>
 
-            {/* Campo de Busca */}
             <div className="mb-6">
               <input
                 type="text"
@@ -282,7 +270,7 @@ function Vendas() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {produtosFiltrados.map(produto => {
-                  const estoque = produto.quantidade || 0;
+                  const estoque = produto.quantity || 0;
                   const noCarrinho = carrinho.find(item => item.id === produto.id);
                   
                   return (
@@ -292,14 +280,14 @@ function Vendas() {
                     >
                       {noCarrinho && (
                         <div className="bg-emerald-500 text-white text-center py-2 text-sm font-semibold">
-                          ✓ {noCarrinho.quantidade} no carrinho
+                          ✓ {noCarrinho.quantity} no carrinho
                         </div>
                       )}
                       
                       <div className="p-6">
                         <div className="flex justify-between items-start mb-3">
                           <h3 className="text-lg font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
-                            {produto.nome}
+                            {produto.name}
                           </h3>
                           <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
                             estoque > 10 
@@ -312,13 +300,13 @@ function Vendas() {
                           </span>
                         </div>
 
-                        {produto.descricao && (
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{produto.descricao}</p>
+                        {produto.description && (
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{produto.description}</p>
                         )}
 
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-3xl font-bold text-emerald-600">
-                            R$ {parseFloat(produto.preco_venda || 0).toFixed(2)}
+                            R$ {parseFloat(produto.sale_price || 0).toFixed(2)}
                           </p>
                         </div>
 
@@ -338,7 +326,6 @@ function Vendas() {
             )}
           </div>
 
-          {/* Carrinho */}
           <div className="lg:sticky lg:top-6 h-fit">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-6">
@@ -354,7 +341,6 @@ function Vendas() {
               </div>
 
               <div className="p-6">
-                {/* Seleção de Cliente */}
                 <div className="mb-6">
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Cliente <span className="text-red-500">*</span>
@@ -367,13 +353,12 @@ function Vendas() {
                     <option value="">Selecione um cliente...</option>
                     {clientes.map(cliente => (
                       <option key={cliente.id} value={cliente.id}>
-                        {cliente.nome}
+                        {cliente.name}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Itens do Carrinho */}
                 <div className="max-h-96 overflow-y-auto mb-6 space-y-3">
                   {carrinho.length === 0 ? (
                     <div className="text-center py-12 text-gray-400">
@@ -384,13 +369,13 @@ function Vendas() {
                   ) : (
                     carrinho.map(item => {
                       const preco = parseFloat(item.preco_unitario || 0);
-                      const subtotal = preco * item.quantidade;
+                      const subtotal = preco * item.quantity;
                       
                       return (
                         <div key={item.id} className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 hover:shadow-md transition-shadow">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <p className="font-bold text-gray-800">{item.nome}</p>
+                              <p className="font-bold text-gray-800">{item.name}</p>
                               <p className="text-sm text-gray-600">
                                 R$ {preco.toFixed(2)} cada
                               </p>
@@ -406,14 +391,14 @@ function Vendas() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm">
                               <button
-                                onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
+                                onClick={() => alterarQuantidade(item.id, item.quantity - 1)}
                                 className="w-8 h-8 border-2 border-emerald-300 rounded-lg font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
                               >
                                 -
                               </button>
-                              <span className="w-12 text-center font-bold text-lg">{item.quantidade}</span>
+                              <span className="w-12 text-center font-bold text-lg">{item.quantity}</span>
                               <button
-                                onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
+                                onClick={() => alterarQuantidade(item.id, item.quantity + 1)}
                                 className="w-8 h-8 border-2 border-emerald-300 rounded-lg font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
                               >
                                 +
@@ -429,7 +414,6 @@ function Vendas() {
                   )}
                 </div>
 
-                {/* Total e Finalizar */}
                 {carrinho.length > 0 && (
                   <div className="border-t-2 border-gray-200 pt-6">
                     <div className="flex justify-between items-center mb-6 bg-emerald-50 p-4 rounded-xl">
@@ -464,7 +448,7 @@ function Vendas() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes slide-in {
           from {
             transform: translateX(100%);

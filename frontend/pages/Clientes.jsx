@@ -10,25 +10,22 @@ function Clientes() {
   const [showModal, setShowModal] = useState(false);
   const [editando, setEditando] = useState(null);
   const [formData, setFormData] = useState({
-    nome: '',
+    name: '',
     email: '',
-    telefone: '',
+    phone: '',
     cpf: '',
-    endereco: '',
+    address: '',
   });
 
-  // Voltar ao Dashboard
   const navigate = useNavigate();
 
-    const voltarAoDashboard = () => {
-      navigate('/dashboard');
-    };
-    // Buscar clientes ao carregar
-useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+  const voltarAoDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  useEffect(() => {
     buscarClientes();
-}, []);
-    
+  }, []);
 
   const buscarClientes = () => {
     setLoading(true);
@@ -45,12 +42,10 @@ useEffect(() => {
       });
   };
 
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.email) {
+    if (!formData.name || !formData.email) {
       alert('Preencha nome e e-mail!');
       return;
     }
@@ -76,14 +71,14 @@ useEffect(() => {
   };
 
   const resetForm = () => {
-    setFormData({ nome: '', email: '', telefone: '', cpf: '', endereco: '' });
+    setFormData({ name: '', email: '', phone: '', cpf: '', address: '' });
     setShowModal(false);
     setEditando(null);
   };
 
-  const handleEdit = (clientes) => {
-    setFormData(clientes);
-    setEditando(clientes);
+  const handleEdit = (cliente) => {
+    setFormData(cliente);
+    setEditando(cliente);
     setShowModal(true);
   };
 
@@ -101,7 +96,6 @@ useEffect(() => {
     }
   };
 
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-100 flex items-center justify-center">
@@ -117,43 +111,40 @@ useEffect(() => {
   }
 
   return (
-      <div className="min-h-screen bg-gray-50">
-        
-        <div className="bg-white shadow-lg border-b border-gray-100">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg">
-                    <Users className="w-8 h-8 text-white" />
-                    </div>
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                      Gestão de Clientes
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Sistema inteligente de controle</p>
-                  </div>
-                </div>
-                <button
-                      onClick={voltarAoDashboard}
-                      className="fixed top-5 left-5 z-50 flex items-center gap-2.5 bg-white border-2 border-gray-300 text-gray-800 px-5 py-3 rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:border-gray-400 hover:bg-gray-50 transform hover:scale-110 transition-all duration-300 group"
-                    >
-                      <ArrowLeftCircle className="w-7 h-7 text-blue-600 group-hover:text-blue-700 transition-colors" />
-                      <span className="hidden sm:inline">Dashboard</span>
-                </button>
-                <button
-                onClick={() => setShowModal(true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-105"
-                >
-                  <Plus className="w-5 h-5" />
-                  Novo Cliente
-                  </button>
-                </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-lg border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  Gestão de Clientes
+                </h1>
+                <p className="text-sm text-gray-500 mt-0.5">Sistema inteligente de controle</p>
               </div>
             </div>
+            <button
+              onClick={voltarAoDashboard}
+              className="fixed top-5 left-5 z-50 flex items-center gap-2.5 bg-white border-2 border-gray-300 text-gray-800 px-5 py-3 rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:border-gray-400 hover:bg-gray-50 transform hover:scale-110 transition-all duration-300 group"
+            >
+              <ArrowLeftCircle className="w-7 h-7 text-blue-600 group-hover:text-blue-700 transition-colors" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-105"
+            >
+              <Plus className="w-5 h-5" />
+              Novo Cliente
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-
-        {/* Estado vazio */}
         {clientes.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-20 text-center border border-blue-100">
             <div className="w-28 h-28 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full mx-auto mb-8 flex items-center justify-center shadow-inner">
@@ -176,72 +167,71 @@ useEffect(() => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-12">
             {[...clientes]
-            .sort((a, b) => a.nome.localeCompare(b.nome))
+              .sort((a, b) => a.name.localeCompare(b.name))
               .map((cliente) => (
-              <div
-                key={cliente.id}
-                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden border border-blue-100"
-              >
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-                <div className="p-8">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center shadow-inner">
-                        <Users className="w-8 h-8 text-blue-600" />
+                <div
+                  key={cliente.id}
+                  className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden border border-blue-100"
+                >
+                  <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                  <div className="p-8">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center shadow-inner">
+                          <Users className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                            {cliente.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">{cliente.email}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-                          {cliente.nome}
-                        </h3>
-                        <p className="text-sm text-gray-500">{cliente.email}</p>
+
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEdit(cliente)}
+                          className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all hover:scale-110"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(cliente.id)}
+                          className="p-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all hover:scale-110"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleEdit(cliente)}
-                        className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all hover:scale-110"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(cliente.id)}
-                        className="p-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all hover:scale-110"
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      {cliente.phone && (
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <Phone className="w-5 h-5 text-blue-500" />
+                          <span className="text-sm font-medium">{cliente.phone}</span>
+                        </div>
+                      )}
+                      {cliente.cpf && (
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <FileText className="w-5 h-5 text-cyan-500" />
+                          <span className="text-sm font-medium">{cliente.cpf}</span>
+                        </div>
+                      )}
+                      {cliente.address && (
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <MapPin className="w-5 h-5 text-indigo-500" />
+                          <span className="text-sm font-medium line-clamp-2">{cliente.address}</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="space-y-4 pt-4 border-t border-gray-100">
-                    {cliente.telefone && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Phone className="w-5 h-5 text-blue-500" />
-                        <span className="text-sm font-medium">{cliente.telefone}</span>
-                      </div>
-                    )}
-                    {cliente.cpf && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <FileText className="w-5 h-5 text-cyan-500" />
-                        <span className="text-sm font-medium">{cliente.cpf}</span>
-                      </div>
-                    )}
-                    {cliente.endereco && (
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <MapPin className="w-5 h-5 text-indigo-500" />
-                        <span className="text-sm font-medium line-clamp-2">{cliente.endereco}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
 
-        {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
@@ -270,8 +260,8 @@ useEffect(() => {
                     <label className="block text-sm font-bold text-gray-700 mb-2">Nome completo *</label>
                     <input
                       type="text"
-                      value={formData.nome}
-                      onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                       className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
                       placeholder="João Silva"
@@ -295,8 +285,8 @@ useEffect(() => {
                     <label className="block text-sm font-bold text-gray-700 mb-2">Telefone</label>
                     <input
                       type="text"
-                      value={formData.telefone}
-                      onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
                       placeholder="(11) 98765-4321"
                     />
@@ -316,8 +306,8 @@ useEffect(() => {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Endereço completo</label>
                   <textarea
-                    value={formData.endereco}
-                    onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     rows={3}
                     className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all resize-none"
                     placeholder="Rua Exemplo, 123 - Bairro - Cidade/SP"

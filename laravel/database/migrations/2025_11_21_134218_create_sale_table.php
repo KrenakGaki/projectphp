@@ -9,15 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('produtos', function (Blueprint $table) {
+        Schema::create('sale', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('descricao')->nullable();
-            $table->integer('quantidade');
-            $table->decimal('preco_custo', 10, 2)->default(0);
-            $table->decimal('preco_venda',10,2)->default(0);
+            $table->string('customer_id')->constrained('customer')->onDelete('cascade');
+            $table->decimal('total', 10, 2);
+            $table->timestamp('sold_at');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produtos');
+        Schema::dropIfExists('sale');
     }
 };

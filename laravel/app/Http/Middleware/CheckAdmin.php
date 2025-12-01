@@ -8,13 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckAdmin
 {
-        public function handle(Request $request, Closure $next): Response
-        {
-            if (!$request->user() || !$request->user()->isAdmin()) {
-                return response()->json([
-                    'message' => 'Acesso negado. Necessário ser Adm.'], 403);
-            }
-
-        return $next($request);
+    public function handle(Request $request, Closure $next)
+    {
+        if ($request->user() && $request->user()->type === 'admin') {
+            return $next($request);
         }
+
+        return response()->json([
+            'message' => 'Acesso negado. Apenas admin.'], 403);
+    }
 }

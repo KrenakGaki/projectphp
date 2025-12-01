@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ControleProdutos extends Model
+class ProductMovement extends Model
 {
+    protected $table = "product_movement";
     protected $fillable = [
-        'produto_id',
-        'tipo',
-        'quantidade',
-        'observacao',
+        'product_id',
+        'type',
+        'quantity',
+        'note',
         'user_id',
     ];
 

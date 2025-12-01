@@ -13,8 +13,8 @@ function Dashboard() {
     const [error,setError] = useState();
     
     //Armazenar dados
-    const [clientes, setClientes] = useState([]);
-    const [produtos, setProdutos] = useState([]);
+    const [cliente, setClientes] = useState([]);
+    const [produto, setProdutos] = useState([]);
     const [vendas, setVendas] = useState([]);
 
     console.log('Usuário:', user);
@@ -53,8 +53,8 @@ function Dashboard() {
 }, []);
 
     //Contagem
-    const totalClientes = clientes.length;
-    const totalProdutos = produtos.length;
+    const totalClientes = cliente.length;
+    const totalProdutos = produto.length;
     const totalVendas = vendas.length;
 
     if (!user) {

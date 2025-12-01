@@ -12,13 +12,12 @@ function Produtos() {
   const [editando, setEditando] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Formulario
   const [formData, setFormData] = useState({
-    nome: "",
-    descricao: "",
-    quantidade: "",
-    preco_custo: "",
-    preco_venda: "",
+    name: "",
+    description: "",
+    quantity: "",
+    cost_price: "",
+    sale_price: "",
   });
 
   const navigate = useNavigate();
@@ -45,21 +44,20 @@ function Produtos() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Salvar produto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.preco_venda || !formData.preco_custo || !formData.quantidade) {
+    if (!formData.name || !formData.sale_price || !formData.cost_price || !formData.quantity) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
     const dadosParaEnviar = {
-      nome: formData.nome,
-      descricao: formData.descricao,
-      preco_custo: parseFloat(formData.preco_custo),
-      preco_venda: parseFloat(formData.preco_venda),
-      quantidade: parseInt(formData.quantidade),
+      name: formData.name,
+      description: formData.description,
+      cost_price: parseFloat(formData.cost_price),
+      sale_price: parseFloat(formData.sale_price),
+      quantity: parseInt(formData.quantity),
     };
 
     try {
@@ -87,11 +85,11 @@ function Produtos() {
 
   const resetForm = () => {
     setFormData({
-      nome: "",
-      descricao: "",
-      quantidade: "",
-      preco_custo: "",
-      preco_venda: "",
+      name: "",
+      description: "",
+      quantity: "",
+      cost_price: "",
+      sale_price: "",
     });
     setShowModal(false);
     setEditando(null);
@@ -99,11 +97,11 @@ function Produtos() {
 
   const handleEdit = (produto) => {
     setFormData({
-      nome: produto.nome,
-      descricao: produto.descricao || "",
-      quantidade: produto.quantidade.toString(),
-      preco_custo: Number(produto.preco_custo).toFixed(2),
-      preco_venda: Number(produto.preco_venda).toFixed(2),
+      name: produto.name,
+      description: produto.description || "",
+      quantity: produto.quantity.toString(),
+      cost_price: Number(produto.cost_price).toFixed(2),
+      sale_price: Number(produto.sale_price).toFixed(2),
     });
     setEditando(produto);
     setShowModal(true);
@@ -122,24 +120,21 @@ function Produtos() {
   };
 
   const produtosFiltrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    produto.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    produto.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
+    produto.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    produto.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    produto.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Cálculos de estatísticas
   const totalProdutos = produtos.length;
-  const valorTotal = produtos.reduce((acc, p) => acc + (p.preco_venda * p.quantidade), 0);
-  const estoqueTotal = produtos.reduce((acc, p) => acc + p.quantidade, 0);
+  const valorTotal = produtos.reduce((acc, p) => acc + (p.sale_price * p.quantity), 0);
+  const estoqueTotal = produtos.reduce((acc, p) => acc + p.quantity, 0);
 
-  //Formatar valor
   const formatarReal = (valorReal) => {
-  return 'R$ ' + Number(valorReal).toLocaleString('pt-BR', { 
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-};
-
+    return 'R$ ' + Number(valorReal).toLocaleString('pt-BR', { 
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   if (loading) {
     return (
@@ -157,7 +152,6 @@ function Produtos() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
-      {/* Header*/}
       <div className="bg-white shadow-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -191,7 +185,6 @@ function Produtos() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-all">
             <div className="flex items-center justify-between">
@@ -230,7 +223,6 @@ function Produtos() {
           </div>
         </div>
 
-        {/* Barra de Pesquisa */}
         <div className="mb-8">
           <div className="relative max-w-md">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -272,95 +264,87 @@ function Produtos() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...produtos]
-            .sort((a, b) => a.nome.localeCompare(b.nome))
+            {[...produtosFiltrados]
+              .sort((a, b) => a.name.localeCompare(b.name))
               .map((produto) => (
-              <div key={produto.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group">
-                <div className="h-2 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500"></div>
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-gray-800 flex-1 group-hover:text-purple-600 transition-colors">
-                      {produto.nome}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(produto)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(produto.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110"
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                <div key={produto.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group">
+                  <div className="h-2 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500"></div>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-gray-800 flex-1 group-hover:text-purple-600 transition-colors">
+                        {produto.name}
+                      </h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(produto)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(produto.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {produto.descricao && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{produto.descricao}</p>
-                  )}
-                  
-                  <div className="space-y-3 mb-4">
-                    <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
-                      <span className="text-gray-600 text-sm font-medium">Custo:</span>
-                      <span className="font-bold text-lg text-blue-600">
-                        {produto.preco_custo
-                          ? `R$ ${Number(produto.preco_custo).toFixed(2).replace('.', ',')}`
-                          : 'Não definido'}
-                      </span>
+                    
+                    {produto.description && (
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{produto.description}</p>
+                    )}
+                    
+                    <div className="space-y-3 mb-4">
+                      <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+                        <span className="text-gray-600 text-sm font-medium">Custo:</span>
+                        <span className="font-bold text-lg text-blue-600">
+                          {produto.cost_price
+                            ? `R$ ${Number(produto.cost_price).toFixed(2).replace('.', ',')}`
+                            : 'Não definido'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                        <span className="text-gray-600 text-sm font-medium">Venda:</span>
+                        <span className={`font-bold text-lg ${
+                          produto.sale_price ? 'text-green-600' : 'text-gray-700'
+                        }`}>
+                          {produto.sale_price
+                            ? `R$ ${Number(produto.sale_price).toFixed(2).replace('.', ',')}`
+                            : 'Não definido'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                        <span className="text-gray-600 text-sm font-medium">Estoque:</span>
+                        <span className={`font-bold text-lg ${produto.quantity < 10 ? 'text-red-600' : 'text-gray-700'}`}>
+                          {produto.quantity} un
+                        </span>
+                      </div>
+                      {produto.cost_price && produto.sale_price && (
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
+                          <span className="text-gray-600 text-sm font-medium">Margem:</span>
+                          <span className="font-bold text-lg text-yellow-700">
+                            {((produto.sale_price - produto.cost_price) / produto.cost_price * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
-                      <span className="text-gray-600 text-sm font-medium">Venda:</span>
-                      <span className={`font-bold text-lg ${
-                        produto.preco_venda ? 'text-green-600' : 'text-gray-700'
-                      }`}>
-                        {produto.preco_venda
-                          ? `R$ ${Number(produto.preco_venda).toFixed(2).replace('.', ',')}`
-                          : 'Não definido'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-600 text-sm font-medium">Estoque:</span>
-                      <span className={`font-bold text-lg ${produto.quantidade < 10 ? 'text-red-600' : 'text-gray-700'}`}>
-                        {produto.quantidade} un
-                      </span>
-                    </div>
-                    {produto.preco_custo && produto.preco_venda && (
-                      <div className="flex justify-between items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
-                        <span className="text-gray-600 text-sm font-medium">Margem:</span>
-                        <span className="font-bold text-lg text-yellow-700">
-                          {((produto.preco_venda - produto.preco_custo) / produto.preco_custo * 100).toFixed(1)}%
+
+                    {produto.category && (
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                        <span className="bg-gradient-to-r from-purple-100 to-fuchsia-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-semibold">
+                          {produto.category}
                         </span>
                       </div>
                     )}
                   </div>
-
-                  {(produto.categoria || produto.fornecedor) && (
-                    <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-                      {produto.categoria && (
-                        <span className="bg-gradient-to-r from-purple-100 to-fuchsia-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-                          {produto.categoria}
-                        </span>
-                      )}
-                      {produto.fornecedor && (
-                        <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-                          {produto.fornecedor}
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
 
-      {/* Modal de Cadastro/Edição */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
@@ -388,8 +372,8 @@ function Produtos() {
                 </label>
                 <input
                   type="text"
-                  name="nome"
-                  value={formData.nome}
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
@@ -402,8 +386,8 @@ function Produtos() {
                   Descrição
                 </label>
                 <textarea
-                  name="descricao"
-                  value={formData.descricao}
+                  name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
                   rows="3"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
@@ -418,8 +402,8 @@ function Produtos() {
                   </label>
                   <input
                     type="number"
-                    name="preco_custo"
-                    value={formData.preco_custo}
+                    name="cost_price"
+                    value={formData.cost_price}
                     onChange={handleInputChange}
                     required
                     step="0.01"
@@ -435,8 +419,8 @@ function Produtos() {
                   </label>
                   <input
                     type="number"
-                    name="preco_venda"
-                    value={formData.preco_venda}
+                    name="sale_price"
+                    value={formData.sale_price}
                     onChange={handleInputChange}
                     required
                     step="0.01"
@@ -453,8 +437,8 @@ function Produtos() {
                 </label>
                 <input
                   type="number"
-                  name="quantidade"
-                  value={formData.quantidade}
+                  name="quantity"
+                  value={formData.quantity}
                   onChange={handleInputChange}
                   required
                   min="0"

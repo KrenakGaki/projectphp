@@ -38,8 +38,8 @@ class DatabaseSeeder extends Seeder
 
     // Agora roda os outros seeders sem medo
     $this->call([
-        ProdutoSeeder::class,
-        ClienteSeeder::class,
+        ProductSeeder::class,
+        CustomerSeeder::class,
         // outros seeders...
     ]);
 }
