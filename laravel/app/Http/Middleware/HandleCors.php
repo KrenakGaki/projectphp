@@ -17,7 +17,7 @@ class HandleCors
             'Access-Control-Allow-Credentials' => 'true',
         ];
 
-        // Responde imediatamente às requisições OPTIONS (pré-flight)
+
         if ($request->getMethod() === 'OPTIONS') {
             return response()->json('OK', 200, $headers);
         }

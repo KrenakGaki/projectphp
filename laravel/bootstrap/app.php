@@ -3,7 +3,6 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,20 +13,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware): void {
-        // Suporte da API
-        $middleware->api(prepend: [EnsureFrontendRequestsAreStateful::class]);
-
+        // Exceções CSRF para API
         $middleware->validateCsrfTokens(except: [
-        'api/*',  // ← Isso deve estar aqui
-    ]);
+            'api/*',
+        ]);
 
-        // Registro do middleware
+        // Aliases de middleware
         $middleware->alias([
+            'auth' => \App\Http\Middleware\Authenticate::class,
             'admin' => \App\Http\Middleware\CheckAdmin::class,
         ]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Vazio por enquanto
+        //
     })
     ->create();

@@ -26,7 +26,7 @@ class SaleController extends Controller
         try {
             $total = 0;
 
-            foreach ($request->produtos as $item) {
+            foreach ($request->product as $item) {
                 $product = Product::findOrFail($item['product_id']);
 
                 if ($product->quantity < $item['quantity']) {
@@ -42,7 +42,7 @@ class SaleController extends Controller
                 'total_amount' => $total,
             ]);
 
-            foreach ($request->produtos as $item) {
+            foreach ($request->product as $item) {
                 $product = Product::findOrFail($item['product_id']);
 
                 SaleProduct::create([

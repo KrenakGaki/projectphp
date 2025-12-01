@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+
+
 class AuthController extends Controller
 {
     public function login(LoginRequest $request)
@@ -52,13 +54,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logout realizado com sucesso'
-        ]);
-    }
-
-    public function me(Request $request)
-    {
-        return response()->json($request->user());
+        return response('Token Revoged', 200);
     }
 }

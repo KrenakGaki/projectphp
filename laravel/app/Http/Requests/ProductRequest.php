@@ -16,21 +16,21 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'nome' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'preco_custo' => 'required|numeric|min:0',
-            'preco_venda' => 'required|numeric|min:0',
-            'quantidade' => 'required|integer|min:0',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'cost_price' => 'required|numeric|min:0',
+            'sale_price' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
         ];
 
-        // Se for update, torna os campos opcionais
+
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
             $rules = [
-                'nome' => 'sometimes|required|string|max:255',
-                'descricao' => 'sometimes|nullable|string',
-                'preco_custo' => 'sometimes|required|numeric|min:0',
-                'preco_venda' => 'sometimes|required|numeric|min:0',
-                'quantidade' => 'sometimes|required|integer|min:0',
+                'name' => 'sometimes|required|string|max:255',
+                'description' => 'sometimes|nullable|string',
+                'cost_price' => 'sometimes|required|numeric|min:0',
+                'sale_price' => 'sometimes|required|numeric|min:0',
+                'quantity' => 'sometimes|required|integer|min:0',
             ];
         }
 
@@ -40,17 +40,17 @@ class ProductRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nome.required' => 'O nome do produto é obrigatório',
-            'nome.max' => 'O nome não pode ter mais de 255 caracteres',
-            'preco_custo.required' => 'O preço de custo é obrigatório',
-            'preco_custo.numeric' => 'O preço de custo deve ser um número',
-            'preco_custo.min' => 'O preço de custo não pode ser negativo',
-            'preco_venda.required' => 'O preço de venda é obrigatório',
-            'preco_venda.numeric' => 'O preço de venda deve ser um número',
-            'preco_venda.min' => 'O preço de venda não pode ser negativo',
-            'quantidade.required' => 'A quantidade é obrigatória',
+            'name.required' => 'O nome do produto é obrigatório',
+            'name.max' => 'O nome não pode ter mais de 255 caracteres',
+            'cost_price.required' => 'O preço de custo é obrigatório',
+            'cost_price.numeric' => 'O preço de custo deve ser um número',
+            'cost_price.min' => 'O preço de custo não pode ser negativo',
+            'sale_price.required' => 'O preço de venda é obrigatório',
+            'sale_price.numeric' => 'O preço de venda deve ser um número',
+            'sale_price.min' => 'O preço de venda não pode ser negativo',
+            'quantity.required' => 'A quantidade é obrigatória',
             'quantity.integer' => 'A quantidade deve ser um número inteiro',
-            'quantidade.min' => 'A quantidade não pode ser negativa',
+            'quantity.min' => 'A quantidade não pode ser negativa',
         ];
     }
 
