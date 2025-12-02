@@ -7,17 +7,11 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
@@ -26,9 +20,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Mensagens customizadas de validação
-     */
     public function messages(): array
     {
         return [
@@ -39,9 +30,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Customizar resposta de erro para API (JSON)
-     */
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(

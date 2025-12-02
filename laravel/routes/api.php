@@ -19,22 +19,21 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/register', [AuthController::class, 'register']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
-    Route::get('/dashboard/recent-sales', [DashboardController::class, 'recentSales']);
-    Route::get('/dashboard/top-products', [DashboardController::class, 'topProducts']);
 
-    // Customers (clientes)
+    // Customers
     Route::apiResource('clientes', CustomerController::class);
 
-    // Products (produtos)
+    // Products
     Route::apiResource('produtos', ProductController::class);
 
-    // Sales (vendas)
+    // Sales
     Route::apiResource('vendas', SaleController::class);
 
-    // Users (usuários) - apenas admin
+    // Users
     Route::middleware('check.admin')->group(function () {
         Route::apiResource('users', UserController::class);
     });

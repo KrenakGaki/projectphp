@@ -15,6 +15,6 @@ class CheckAdmin
         }
 
         return response()->json([
-            'message' => 'Acesso negado. Apenas admin.'], 403);
+            'message' => 'Acesso negado.'], 403);
     }
 }

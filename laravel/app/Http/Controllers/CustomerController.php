@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CustomerRequest;
 
 class CustomerController extends Controller
@@ -38,7 +39,7 @@ class CustomerController extends Controller
         $customer->delete();
 
         return response()->json([
-            'message' => 'Cliente removido com sucesso'
+            'message' => 'Cliente removido   com sucesso'
         ]);
     }
 }
