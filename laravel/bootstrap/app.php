@@ -13,15 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware): void {
-        // Exceções CSRF para API
-        $middleware->validateCsrfTokens(except: [
-            'api/*',
-        ]);
-
         // Aliases de middleware
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
-            'admin' => \App\Http\Middleware\CheckAdmin::class,
+            'check.admin' => \App\Http\Middleware\CheckAdmin::class,
         ]);
     })
 

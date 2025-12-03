@@ -18,7 +18,7 @@ services:
       POSTGRES_PASSWORD: vikki
       POSTGRES_DB: laravel
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-
     public function login(LoginRequest $request)
     {
 
@@ -29,12 +28,13 @@ class AuthController extends Controller
         ]);
     }
 
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
+    }
+
     public function register(RegisterRequest $request)
     {
-        if(Auth::user()->type !== 'admin') {
-            return response()->json(['message' => 'Acesso negado'], 403);
-        }
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -55,6 +55,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response('Token Revoged', 200);
+        return response('Token Revogado', 200);
     }
 }

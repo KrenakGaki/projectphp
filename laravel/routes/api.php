@@ -11,7 +11,6 @@ use App\Http\Controllers\DashboardController;
 
 // Rotas públicas (sem autenticação)
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
 
 // Rotas protegidas (requer Bearer Token)
 Route::middleware('auth:sanctum')->group(function () {
@@ -19,7 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('check.admin');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
