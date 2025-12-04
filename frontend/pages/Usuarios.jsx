@@ -36,7 +36,7 @@ function Usuarios() {
     api.get('/usuarios')
       .then(res => {
         console.log('Usuários recebidos:', res.data);
-        setUsuarios(res.data);
+        setUsuarios(res.data || []);
       })
       .catch(err => console.error('Erro ao buscar usuários:', err))
       .finally(() => setCarregando(false));
@@ -150,25 +150,22 @@ function Usuarios() {
     }
 
     try {
-      // ATUALIZAÇÃO OTIMISTA: Remove da UI imediatamente
       const usuariosAtualizados = usuarios.filter(u => u.id !== id);
       setUsuarios(usuariosAtualizados);
       alert('Usuário excluído com sucesso!');
       
-      // Deleta no servidor em background
       await api.delete(`/usuarios/${id}`);
       
     } catch (err) {
       console.error('Erro:', err);
-      // Reverte em caso de erro
       buscarUsuarios();
       alert('Erro ao excluir usuário');
     }
   };
 
-  const usuariosFiltrados = usuarios.filter(user =>
-    user.name.toLowerCase().includes(busca.toLowerCase()) ||
-    user.email.toLowerCase().includes(busca.toLowerCase())
+  const usuariosFiltrados = (usuarios || []).filter(user =>
+    user?.name?.toLowerCase().includes(busca.toLowerCase()) ||
+    user?.email?.toLowerCase().includes(busca.toLowerCase())
   );
 
   const isAdmin = usuarioLogado?.type === 'admin';
@@ -201,11 +198,11 @@ function Usuarios() {
             
             <div className="text-right">
               <p className="text-sm text-gray-500">
-                Total: <span className="font-bold text-blue-600">{usuarios.length}</span> usuários
+                Total: <span className="font-bold text-blue-600">{usuarios?.length || 0}</span> usuários
               </p>
               <p className="text-xs text-gray-400">
-                Admin: {usuarios.filter(u => u.type === 'admin').length} | 
-                User: {usuarios.filter(u => u.type === 'user').length}
+                Admin: {(usuarios || []).filter(u => u?.type === 'admin').length} | 
+                User: {(usuarios || []).filter(u => u?.type === 'user').length}
               </p>
             </div>
           </div>

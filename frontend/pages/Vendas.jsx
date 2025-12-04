@@ -117,14 +117,14 @@ function Vendas() {
       customer_id: parseInt(clienteSelecionado),
       total: total,
       status: 'pending',
-      products: carrinho.map(item => ({
+      product: carrinho.map(item => ({
         id: item.id,
         quantity: item.quantity,
         price: item.preco_unitario
       }))
     };
 
-    console.log('Dados da venda:', dadosVenda);
+    console.log('Dados da venda:', dadosVenda);   
 
     try {
       const response = await api.post('/vendas', dadosVenda, {
@@ -253,7 +253,7 @@ function Vendas() {
             <div className="mb-6">
               <input
                 type="text"
-                placeholder="🔍 Buscar produtos..."
+                placeholder="Buscar produtos..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all text-lg"

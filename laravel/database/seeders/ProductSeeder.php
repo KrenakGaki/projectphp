@@ -38,6 +38,6 @@ class ProductSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('80 produtos reais criados com sucesso usando Faker!');
+        $this->command->info('80 Produtos criados');
     }
 }

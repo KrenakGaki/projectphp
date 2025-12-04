@@ -66,9 +66,17 @@ function Clientes() {
       })
       .catch(err => {
         console.error('Erro ao salvar:', err);
-        alert('Erro ao salvar cliente');
+        
+        if (err.response?.data?.errors) {
+          const erros = Object.entries(err.response.data.errors)
+            .map(([campo, msgs]) => `${campo}: ${msgs.join(', ')}`)
+            .join('\n');
+          alert('Erros de validação:\n' + erros);
+        } else {
+          alert('Erro ao salvar cliente');
+        }
       });
-  };
+};
 
   const resetForm = () => {
     setFormData({ name: '', email: '', phone: '', cpf: '', address: '' });

@@ -34,6 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Users
     Route::middleware('check.admin')->group(function () {
-        Route::apiResource('users', UserController::class);
+        Route::apiResource('usuarios', UserController::class);
     });
 });

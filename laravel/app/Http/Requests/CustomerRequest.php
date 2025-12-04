@@ -3,10 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CustomerRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -15,11 +16,22 @@ class CustomerRequest extends FormRequest
     {
         $customerId = $this->route('cliente');
 
+        if ($this->isMethod('post')) {
+            return [
+                'name' => 'required|string|max:255',
+                'email' => ['required', 'email', Rule::unique('customer', 'email')],
+                'cpf' => ['nullable', 'cpf', Rule::unique('customer', 'cpf')],
+                'phone' => 'nullable|string',
+                'address' => 'nullable|string',
+            ];
+        }
+
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:customer,email,' . $customerId,
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'name' => 'sometimes|string|max:255',
+            'email' => ['sometimes', 'email', Rule::unique('customer', 'email')->ignore($customerId)],
+            'cpf' => ['sometimes', 'cpf', Rule::unique('customer', 'cpf')->ignore($customerId)],
+            'phone' => 'sometimes|string',
+            'address' => 'sometimes|string',
         ];
     }
 

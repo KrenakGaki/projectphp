@@ -25,6 +25,6 @@ class CustomerSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('150 clientes criados com sucesso! (5 VIPs + 145 aleatórios)');
+        $this->command->info('150 clientes criados');
     }
 }

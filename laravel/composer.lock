@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "94c5f75489078e08572b5e8db5a4df68",
+    "content-hash": "4de57b1ec2f5e65fbc0d60d2325bb928",
     "packages": [
         {
             "name": "brick/math",
@@ -578,6 +578,67 @@
                 }
             ],
             "time": "2023-10-12T05:21:21+00:00"
+        },
+        {
+            "name": "geekcom/validator-docs",
+            "version": "3.11.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/geekcom/validator-docs.git",
+                "reference": "0bcd4ee967732c324b003a26f8317a80fea90372"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/geekcom/validator-docs/zipball/0bcd4ee967732c324b003a26f8317a80fea90372",
+                "reference": "0bcd4ee967732c324b003a26f8317a80fea90372",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0",
+                "thiagocfn/inscricaoestadual": "^1.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.0",
+                "php-coveralls/php-coveralls": "^2.5",
+                "phpstan/phpstan": "^1.4",
+                "phpunit/phpunit": "^8.4|^9.4",
+                "squizlabs/php_codesniffer": "*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "geekcom\\ValidatorDocs\\ValidatorProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "geekcom\\ValidatorDocs\\": "src/validator-docs"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Rodrigues Lima",
+                    "email": "geekcom@php.net"
+                }
+            ],
+            "description": "Biblioteca PHP para validação de documentos do Brasil usando Laravel",
+            "support": {
+                "issues": "https://github.com/geekcom/validator-docs/issues",
+                "source": "https://github.com/geekcom/validator-docs/tree/3.11.1"
+            },
+            "funding": [
+                {
+                    "url": "https://nubank.com.br/pagar/518o5/zVBzxd00Sb",
+                    "type": "custom"
+                }
+            ],
+            "time": "2025-05-13T01:02:12+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -4237,23 +4298,22 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v7.3.5",
+            "version": "v7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "ce31218c7cac92eab280762c4375fb70a6f4f897"
+                "reference": "769c1720b68e964b13b58529c17d4a385c62167b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/ce31218c7cac92eab280762c4375fb70a6f4f897",
-                "reference": "ce31218c7cac92eab280762c4375fb70a6f4f897",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/769c1720b68e964b13b58529c17d4a385c62167b",
+                "reference": "769c1720b68e964b13b58529c17d4a385c62167b",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
-                "symfony/deprecation-contracts": "^2.5|^3.0",
-                "symfony/polyfill-mbstring": "~1.1",
-                "symfony/polyfill-php83": "^1.27"
+                "symfony/deprecation-contracts": "^2.5|^3",
+                "symfony/polyfill-mbstring": "^1.1"
             },
             "conflict": {
                 "doctrine/dbal": "<3.6",
@@ -4262,13 +4322,13 @@
             "require-dev": {
                 "doctrine/dbal": "^3.6|^4",
                 "predis/predis": "^1.1|^2.0",
-                "symfony/cache": "^6.4.12|^7.1.5",
-                "symfony/clock": "^6.4|^7.0",
-                "symfony/dependency-injection": "^6.4|^7.0",
-                "symfony/expression-language": "^6.4|^7.0",
-                "symfony/http-kernel": "^6.4|^7.0",
-                "symfony/mime": "^6.4|^7.0",
-                "symfony/rate-limiter": "^6.4|^7.0"
+                "symfony/cache": "^6.4.12|^7.1.5|^8.0",
+                "symfony/clock": "^6.4|^7.0|^8.0",
+                "symfony/dependency-injection": "^6.4|^7.0|^8.0",
+                "symfony/expression-language": "^6.4|^7.0|^8.0",
+                "symfony/http-kernel": "^6.4|^7.0|^8.0",
+                "symfony/mime": "^6.4|^7.0|^8.0",
+                "symfony/rate-limiter": "^6.4|^7.0|^8.0"
             },
             "type": "library",
             "autoload": {
@@ -4296,7 +4356,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v7.3.5"
+                "source": "https://github.com/symfony/http-foundation/tree/v7.4.0"
             },
             "funding": [
                 {
@@ -4316,7 +4376,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-24T21:42:11+00:00"
+            "time": "2025-11-13T08:49:24+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -6098,6 +6158,51 @@
                 }
             ],
             "time": "2025-09-27T09:00:46+00:00"
+        },
+        {
+            "name": "thiagocfn/inscricaoestadual",
+            "version": "1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Thiagocfn/InscricaoEstadual.git",
+                "reference": "414a43f152b9ff39b9cabd33c9bdf34a2018df1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Thiagocfn/InscricaoEstadual/zipball/414a43f152b9ff39b9cabd33c9bdf34a2018df1b",
+                "reference": "414a43f152b9ff39b9cabd33c9bdf34a2018df1b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.16"
+            },
+            "require-dev": {
+                "codacy/coverage": "dev-master",
+                "phpunit/phpunit": "^5.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Thiagocfn\\InscricaoEstadual\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Thiago Souza",
+                    "email": "thiagocfn@msn.com"
+                }
+            ],
+            "description": "Biblioteca em PHP para validação de todas as Inscrições Estaduais de todo o Brasil, seguindo as regras da SEFAZ. http://www.sintegra.gov.br/insc_est.html",
+            "homepage": "https://github.com/thiagocfn/inscricaoestadual",
+            "support": {
+                "issues": "https://github.com/Thiagocfn/InscricaoEstadual/issues",
+                "source": "https://github.com/Thiagocfn/InscricaoEstadual/tree/1.1.2"
+            },
+            "time": "2021-03-12T00:57:51+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",
