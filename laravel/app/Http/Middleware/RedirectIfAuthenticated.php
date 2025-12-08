@@ -22,7 +22,6 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Como é uma API, retornamos JSON em vez de redirecionar
                 return response()->json([
                     'message' => 'Usuário já autenticado.'
                 ], 200);

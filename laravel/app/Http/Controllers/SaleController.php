@@ -27,7 +27,7 @@ class SaleController extends Controller
             $total = 0;
 
             foreach ($request->product as $item) {
-                $product = Product::findOrFail($item['product_id']);
+                $product = Product::findOrFail($item['id']);
 
                 if ($product->quantity < $item['quantity']) {
                     throw new \Exception("Estoque insuficiente para: {$product->name}");
@@ -39,17 +39,18 @@ class SaleController extends Controller
             $sale = Sale::create([
                 'customer_id' => $request->customer_id,
                 'user_id' => $request->user()->id,
-                'total_amount' => $total,
+                'total' => $total,
+                'sold_at' => now(),
             ]);
 
             foreach ($request->product as $item) {
-                $product = Product::findOrFail($item['product_id']);
+                $product = Product::findOrFail($item['id']);
 
                 SaleProduct::create([
                     'sale_id' => $sale->id,
-                    'product_id' => $product->id,
+                    'product_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'unit_price' => $product->sale_price,
+                    'sale_price' => $product->sale_price,
                     'subtotal' => $product->sale_price * $item['quantity'],
                 ]);
 

@@ -11,9 +11,10 @@ class Sale extends Model
 
 
     protected $fillable = [
-        'cliente_id',
+        'customer_id',
         'total',
-        'data_Sale',
+        'data_sale',
+        'sold_at'
     ];
 
     protected $casts = [
@@ -24,7 +25,7 @@ class Sale extends Model
 
     // Link com o modelo Cliente e Itens
 
-    public function cliente()
+    public function customer()
     {
         return $this->belongsTo(Customer::class);
 
@@ -32,6 +33,12 @@ class Sale extends Model
 
     public function itens() {
         return $this->hasMany(SaleProduct::class);
+    }
+
+    public function product()
+    {
+    return $this->belongsToMany(Product::class, 'sale_products')
+        ->withPivot('quantity', 'sale_price', 'subtotal');
     }
 }
 

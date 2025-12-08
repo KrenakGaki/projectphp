@@ -9,13 +9,13 @@ class SaleProduct extends Model
 {
     use HasFactory;
 
-    protected $table = 'sale_product';
+    protected $table = 'sale_products';
 
     protected $fillable = [
         'sale_id',
         'product_id',
         'quantity',
-        'unit_price',
+        'sale_price',
         'subtotal',
     ];
 
