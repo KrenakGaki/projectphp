@@ -3,105 +3,101 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SaleRequest;
-use App\Models\Sale;
-use App\Models\SaleProduct;
-use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use App\Services\SaleService;
+use App\Exceptions\ProductNotFoundException;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\SaleNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Exception;
 
 class SaleController extends Controller
 {
+    protected $saleService;
+
+    public function __construct(SaleService $saleService)
+    {
+        $this->saleService = $saleService;
+    }
+
     public function index(): JsonResponse
     {
-        $sales = Sale::with(['customer', 'product'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
+        $sales = $this->saleService->getAllSales();
         return response()->json($sales);
     }
 
     public function store(SaleRequest $request): JsonResponse
     {
-        DB::beginTransaction();
         try {
-            $total = 0;
-
-            foreach ($request->product as $item) {
-                $product = Product::findOrFail($item['id']);
-
-                if ($product->quantity < $item['quantity']) {
-                    throw new \Exception("Estoque insuficiente para: {$product->name}");
-                }
-
-                $total += $product->sale_price * $item['quantity'];
-            }
-
-            $sale = Sale::create([
-                'customer_id' => $request->customer_id,
-                'user_id' => $request->user()->id,
-                'total' => $total,
-                'sold_at' => now(),
-            ]);
-
-            foreach ($request->product as $item) {
-                $product = Product::findOrFail($item['id']);
-
-                SaleProduct::create([
-                    'sale_id' => $sale->id,
-                    'product_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'sale_price' => $product->sale_price,
-                    'subtotal' => $product->sale_price * $item['quantity'],
-                ]);
-
-                $product->decrement('quantity', $item['quantity']);
-            }
-
-            DB::commit();
-
+            $data = $request->validated();
+            $sale = $this->saleService->createSale($data, $request->user()->id);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Venda realizada com sucesso!',
-                'data' => $sale->load(['customer', 'product'])
+                'data'    => $sale
             ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
+            
+        } catch (ProductNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 400);
+            ], 404);
+            
+        } catch (InsufficientStockException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao processar venda: ' . $e->getMessage()
+            ], 500);
         }
     }
 
     public function show($id): JsonResponse
     {
-        $sale = Sale::with(['customer', 'product'])->findOrFail($id);
-        return response()->json($sale);
+        try {
+            $sale = $this->saleService->getSaleById($id);
+            return response()->json($sale);
+            
+        } catch (SaleNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 404);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao buscar venda: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id): JsonResponse
     {
-        DB::beginTransaction();
         try {
-            $sale = Sale::with('saleproduct')->findOrFail($id);
-
-            foreach ($sale->saleproduct as $item) {
-                Product::find($item->product_id)?->increment('quantity', $item->quantity);
-            }
-
-            $sale->delete();
-            DB::commit();
-
+            $this->saleService->cancelSale($id);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Venda cancelada com sucesso!'
             ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Error'], 500);
+            
+        } catch (SaleNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 404);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao cancelar venda: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
