@@ -8,16 +8,15 @@ class SaleRepository
 {
     public function getAll(): Collection
     {
-        return Sale::with(['customer', 'product'])
+        return Sale::with(['customer', 'saleProduct.product'])
             ->orderBy('created_at', 'desc')
             ->get();
-
 
     }
     public function findById(int $id): Sale
     {
 
-        return Sale::with(['customer', 'product'])->findOrFail($id);
+        return Sale::with(['customer', 'saleProduct.product'])->findOrFail($id);
 
     }
     public function create(array $data): Sale
@@ -26,8 +25,9 @@ class SaleRepository
         return Sale::create($data);
 
     }
-    public function delete(Sale $sale): bool
+    public function delete(int $id): bool
     {
+        $sale = Sale::findOrFail($id);
         return $sale->delete();
     }
 }

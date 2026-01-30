@@ -11,101 +11,75 @@ use App\Exceptions\SaleNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 
-class SaleService
-{
-    protected $saleRepository;
 
-    public function __construct(SaleRepository $saleRepository)
+class SaleService {
+    
+    protected $saleRepository;
+    protected $productRepository;
+
+    public function __construct(SaleRepository $saleRepository, ProductRepository $productRepository)
     {
         $this->saleRepository = $saleRepository;
+        $this->productRepository = $productRepository;
     }
 
-    public function getAllSales(): Collection
-    {
-        return $this->saleRepository->getAll();
-    }
 
-    public function getSaleById(int $id)
-    {
-        $sale = $this->saleRepository->findById($id);
-        
-        if (!$sale) {
-            throw new SaleNotFoundException($id);
-        }
-        
-        return $sale;
-    }
+    public function createSale(array $data, int $userId) {
+        DB::beginTransaction();
 
-    public function createSale(array $data, int $userId)
-    {
-        return DB::transaction(function () use ($data, $userId) {
-            $productIds = array_column($data['product'], 'id');
-            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
-            
+        try {
             $total = 0;
-            $saleProductsData = [];
-            
+            $saleProductData = [];
 
-            foreach ($data['product'] as $item) {
-                if (!isset($products[$item['id']])) {
-                    throw new ProductNotFoundException($item['id']);
+            $productIds = collect($data['products'])->pluck('product_id')->toArray();
+
+            $products = $this->productRepository->findManyByIds($productIds);
+
+            foreach ($data['products'] as $item) {
+
+                $product = $products->get($item['product_id']);
+
+                if (!$product) {
+                    throw new ProductNotFoundException("Product with ID {$item['product_id']} not found");
                 }
-                
-                $product = $products[$item['id']];
-                
-                if ($product->quantity < $item['quantity']) {
-                    throw new InsufficientStockException($product->name);
+
+                if ($product->stock < $item['quantity']) {
+                    throw new InsufficientStockException("Insufficient stock for product: {$product->name}");
                 }
-                
-                $subtotal = $product->sale_price * $item['quantity'];
+
+                $price = $item['price'] ?? $product->price;
+                $subtotal = $price * $item['quantity'];
                 $total += $subtotal;
-                
-                $saleProductsData[] = [
+
+                $saleProductData[] = [
                     'product_id' => $product->id,
-                    'quantity'   => $item['quantity'],
-                    'sale_price' => $product->sale_price,
-                    'subtotal'   => $subtotal,
+                    'quantity' => $item['quantity'],
+                    'price' => $price,
+                    'subtotal' => $subtotal
                 ];
+
+                $product->decrement('stock', $item['quantity']);
             }
-            
 
             $sale = $this->saleRepository->create([
-                'customer_id' => $data['customer_id'],
-                'user_id'     => $userId,
-                'total'       => $total,
-                'sold_at'     => now(),
+                'customer_id' => $userId,
+                'total' => $total,
+                'status' => $data['status'] ?? 'completed',
+                'payment_method' => $data['payment_method'] ?? null,
+                'notes' => $data['notes'] ?? null
             ]);
-            
 
-            foreach ($saleProductsData as $itemData) {
-                $itemData['sale_id'] = $sale->id;
-                SaleProduct::create($itemData);
-                
-                Product::where('id', $itemData['product_id'])
-                    ->decrement('quantity', $itemData['quantity']);
+            foreach ($saleProductData as $saleProduct) {
+                $sale->saleProducts()->create($saleProduct);
             }
-            
-            return $sale->load(['customer', 'product']);
-        });
-    }
 
-    public function cancelSale(int $id): void
-    {
-        DB::transaction(function () use ($id) {
-            $sale = $this->saleRepository->findById($id);
-            
-            if (!$sale) {
-                throw new SaleNotFoundException($id);
-            }
-            
-            $sale->load('product');
-            
-            foreach ($sale->products as $item) {
-                Product::where('id', $item->product_id)
-                    ->increment('quantity', $item->quantity);
-            }
-            
-            $this->saleRepository->delete($sale);
-        });
+            DB::commit();
+
+            return $sale->load('saleProducts.product');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }
