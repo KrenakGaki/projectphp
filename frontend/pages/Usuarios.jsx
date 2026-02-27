@@ -22,12 +22,9 @@ function Usuarios() {
   const buscarUsuarioLogado = async () => {
     try {
       const response = await api.get('/me');
-      console.log('Usuário logado:', response.data);
       setUsuarioLogado(response.data);
     } catch (err) {
       console.error('Erro ao buscar usuário logado:', err);
-      // Se não conseguir buscar, assume que não está logado ou redireciona
-      // navigate('/login');
     }
   };
 
@@ -35,7 +32,6 @@ function Usuarios() {
     setCarregando(true);
     api.get('/usuarios')
       .then(res => {
-        console.log('Usuários recebidos:', res.data);
         setUsuarios(res.data || []);
       })
       .catch(err => console.error('Erro ao buscar usuários:', err))

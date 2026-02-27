@@ -19,6 +19,7 @@ class CustomerRequest extends FormRequest
         if ($this->isMethod('post')) {
             return [
                 'name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
                 'email' => ['required', 'email', Rule::unique('customer', 'email')],
                 'cpf' => ['nullable', 'cpf', Rule::unique('customer', 'cpf')],
                 'phone' => 'nullable|string',
@@ -28,6 +29,7 @@ class CustomerRequest extends FormRequest
 
         return [
             'name' => 'sometimes|string|max:255',
+            'last_name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', Rule::unique('customer', 'email')->ignore($customerId)],
             'cpf' => ['sometimes', 'cpf', Rule::unique('customer', 'cpf')->ignore($customerId)],
             'phone' => 'sometimes|string',
@@ -39,6 +41,7 @@ class CustomerRequest extends FormRequest
     {
         return [
             'name.required' => 'O nome é obrigatório',
+            'last_name.required' => 'O nome é obrigatório',
             'email.required' => 'O email é obrigatório',
             'email.email' => 'O email deve ser válido',
             'email.unique' => 'Este email já está cadastrado',

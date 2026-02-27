@@ -24,7 +24,7 @@ function Produtos() {
 
   const buscarProdutos = async () => {
     try {
-      setLoading(true);
+
       const response = await api.get('/produtos');
       setProdutos(response.data);
     } catch (err) {

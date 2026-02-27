@@ -28,32 +28,10 @@ class SaleController extends Controller
     public function store(SaleRequest $request): JsonResponse
     {
         try {
-            $data = $request->validated();
-            $sale = $this->saleService->createSale($data, $request->user()->id);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Venda realizada com sucesso!',
-                'data'    => $sale
-            ], 201);
-            
-        } catch (ProductNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
-            
-        } catch (InsufficientStockException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
-            
+            $sale = $this->saleService->createSale($request->validated(), $request->user()->id);
+            return $this->success($sale, 'Venda realizada com sucesso!', 201);
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao processar venda: ' . $e->getMessage()
-            ], 500);
+            return $this->handleError($e);
         }
     }
 
@@ -62,42 +40,41 @@ class SaleController extends Controller
         try {
             $sale = $this->saleService->getSaleById($id);
             return response()->json($sale);
-            
-        } catch (SaleNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
-            
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao buscar venda: ' . $e->getMessage()
-            ], 500);
+            return $this->handleError($e);
         }
     }
 
     public function destroy($id): JsonResponse
-    {
+    {   
         try {
             $this->saleService->cancelSale($id);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Venda cancelada com sucesso!'
-            ]);
-            
-        } catch (SaleNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
-            
+            return $this->success(null, 'Venda cancelada com sucesso!');
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao cancelar venda: ' . $e->getMessage()
-            ], 500);
+            return $this->handleError($e);
         }
+    }
+
+    private function success($data, string $message, int $code = 200): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ], $code);
+    }
+
+    private function handleError(Exception $e): JsonResponse
+    {
+        $statusCode = match(get_class($e)) {
+            ProductNotFoundException::class, SaleNotFoundException::class => 404,
+            InsufficientStockException::class => 422,
+            default => 500
+        };
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], $statusCode);
     }
 }

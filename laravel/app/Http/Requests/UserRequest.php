@@ -14,12 +14,12 @@ class UserRequest extends FormRequest
 
     public function rules()
     {
-        $userId = $this->route('user');
+        $userId = $this->route('usuario');
 
         if ($this->isMethod('POST')) {
-        $rules = [
+        return [
             'name' => 'required|string|max:255',
-            'email' => ['required','email',Rule::unique('users','email')->ignore($userId)],
+            'email' => ['required','email','unique:users,email'],
             'password' => 'required|string|min:6',
             'type' => 'required|in:admin,user',
         ];

@@ -25,7 +25,7 @@ RUN a2enmod rewrite
 # Define o diretório de trabalho
 WORKDIR /var/www/html
 
-# Cria estrutura de diretórios Laravel (caso não existam)
+# Cria estrutura de diretórios Laravel
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     && mkdir -p storage/logs \
     && mkdir -p bootstrap/cache

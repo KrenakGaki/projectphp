@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
 {
-    // Usuário admin (não quebra se já existir)
+    // Usuário admin
     User::updateOrCreate(
         ['email' => 'admin@email.com'],
         [
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         ]
     );
 
-    // Usuário comum (vendedor)
+    // Usuário comum
     User::updateOrCreate(
         ['email' => 'vendedor@email.com'],
         [
@@ -36,11 +36,10 @@ class DatabaseSeeder extends Seeder
         ]
     );
 
-    // Agora roda os outros seeders sem medo
+
     $this->call([
         ProductSeeder::class,
         CustomerSeeder::class,
-        // outros seeders...
     ]);
 }
 }

@@ -1,16 +1,24 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, X, Users, Phone, FileText, MapPin, ArrowLeftCircle } from 'lucide-react';
+import { 
+  Plus, Edit2, Trash2, X, Users, Phone, Mail, 
+  FileText, MapPin, ArrowLeftCircle, Search, Filter,
+  CheckCircle, AlertCircle, XCircle
+} from 'lucide-react';
 import api from '../services/api';
 
 function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showSidePanel, setShowSidePanel] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [notificacao, setNotificacao] = useState(null);
+  const [confirmacao, setConfirmacao] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
+    last_name: '',
     email: '',
     phone: '',
     cpf: '',
@@ -18,6 +26,19 @@ function Clientes() {
   });
 
   const navigate = useNavigate();
+
+  const mostrarNotificacao = (mensagem, tipo = 'info') => {
+    setNotificacao({ mensagem, tipo });
+    setTimeout(() => setNotificacao(null), 4000);
+  };
+
+  const mostrarConfirmacao = (mensagem, onConfirm) => {
+    setConfirmacao({ mensagem, onConfirm });
+  };
+
+  const fecharConfirmacao = () => {
+    setConfirmacao(null);
+  };
 
   const voltarAoDashboard = () => {
     navigate('/dashboard');
@@ -35,7 +56,7 @@ function Clientes() {
       })
       .catch(error => {
         console.error('Erro ao carregar clientes:', error);
-        alert('Erro ao carregar clientes');
+        mostrarNotificacao('Erro ao carregar clientes', 'error');
       })
       .finally(() => {
         setLoading(false);
@@ -46,13 +67,25 @@ function Clientes() {
     e.preventDefault();
 
     if (!formData.name || !formData.email) {
-      alert('Preencha nome e e-mail!');
+      mostrarNotificacao('Preencha nome e e-mail!', 'warning');
       return;
     }
 
+    // Limpa campos vazios antes de enviar
+    const dadosLimpos = {
+      name: formData.name.trim(),
+      last_name: formData.last_name?.trim() || '',
+      email: formData.email.trim(),
+      phone: formData.phone?.trim() || '',
+      cpf: formData.cpf?.trim() || '',
+      address: formData.address?.trim() || '',
+    };
+
+    console.log('Enviando dados:', dadosLimpos);
+
     const requisicao = editando
-      ? api.put(`/clientes/${editando.id}`, formData)
-      : api.post('/clientes', formData);
+      ? api.put(`/clientes/${editando.id}`, dadosLimpos)
+      : api.post('/clientes', dadosLimpos);
 
     requisicao
       .then(response => {
@@ -62,57 +95,149 @@ function Clientes() {
           setClientes(prev => [...prev, response.data]);
         }
         resetForm();
-        alert('Cliente salvo com sucesso!');
+        mostrarNotificacao('Cliente salvo com sucesso!', 'success');
       })
       .catch(err => {
         console.error('Erro ao salvar:', err);
+        console.error('Response data:', err.response?.data);
         
         if (err.response?.data?.errors) {
-          const erros = Object.entries(err.response.data.errors)
-            .map(([campo, msgs]) => `${campo}: ${msgs.join(', ')}`)
-            .join('\n');
-          alert('Erros de validação:\n' + erros);
+          // Pega o primeiro erro de cada campo
+          const primeiroErro = Object.values(err.response.data.errors)
+            .flat()
+            .slice(0, 2) // Mostra no máximo 2 erros
+            .join(' • ');
+          mostrarNotificacao(primeiroErro, 'error');
+        } else if (err.response?.data?.message) {
+          mostrarNotificacao(err.response.data.message, 'error');
         } else {
-          alert('Erro ao salvar cliente');
+          mostrarNotificacao('Erro ao salvar cliente. Verifique os dados.', 'error');
         }
       });
-};
+  };
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', phone: '', cpf: '', address: '' });
-    setShowModal(false);
+    setFormData({ name: '', last_name: '', email: '', phone: '', cpf: '', address: '' });
+    setShowSidePanel(false);
     setEditando(null);
   };
 
   const handleEdit = (cliente) => {
-    setFormData(cliente);
+    setFormData({
+      name: cliente.name || '',
+      last_name: cliente.last_name || '',
+      email: cliente.email || '',
+      phone: cliente.phone || '',
+      cpf: cliente.cpf || '',
+      address: cliente.address || '',
+    });
     setEditando(cliente);
-    setShowModal(true);
+    setShowSidePanel(true);
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
-      api.delete(`/clientes/${id}`)
-        .then(() => {
-          setClientes(prev => prev.filter(c => c.id !== id));
-          alert('Cliente excluído com sucesso!');
-        })
-        .catch(err => {
-          console.error('Erro ao excluir:', err);
-          alert('Erro ao excluir cliente');
-        });
-    }
+    const cliente = clientes.find(c => c.id === id);
+    const nomeCliente = cliente ? `${cliente.name} ${cliente.last_name}` : 'este cliente';
+    
+    mostrarConfirmacao(
+      `Tem certeza que deseja excluir ${nomeCliente}?`,
+      () => {
+        api.delete(`/clientes/${id}`)
+          .then(() => {
+            setClientes(prev => prev.filter(c => c.id !== id));
+            mostrarNotificacao('Cliente excluído com sucesso!', 'success');
+          })
+          .catch(err => {
+            console.error('Erro ao excluir:', err);
+            mostrarNotificacao('Erro ao excluir cliente', 'error');
+          });
+      }
+    );
+  };
+
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (cliente.cpf && cliente.cpf.includes(searchTerm))
+  );
+
+  const Notificacao = () => {
+    if (!notificacao) return null;
+
+    const icones = {
+      success: <CheckCircle className="w-6 h-6" />,
+      error: <XCircle className="w-6 h-6" />,
+      warning: <AlertCircle className="w-6 h-6" />,
+      info: <AlertCircle className="w-6 h-6" />
+    };
+
+    const cores = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+
+    return (
+      <div className="fixed top-4 right-4 z-[9999] animate-slide-in">
+        <div 
+          className={`${cores[notificacao.tipo]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md`} tabIndex={1} ref={(el) => el?.focus()}>
+          {icones[notificacao.tipo]}
+          <p className="flex-1 font-semibold">{notificacao.mensagem}</p>
+          <button 
+            onClick={() => setNotificacao(null)}
+            className="hover:bg-white/20 rounded-lg p-1 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const ModalConfirmacao = () => {
+    if (!confirmacao) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-red-100 rounded-full">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Confirmar Exclusão</h3>
+          </div>
+          
+          <p className="text-gray-600 mb-6">{confirmacao.mensagem}</p>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={fecharConfirmacao}
+              className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                confirmacao.onConfirm();
+                fecharConfirmacao();
+              }}
+              className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-8">
-            <div className="absolute inset-0 border-8 border-blue-200 rounded-full"></div>
-            <div className="absolute inset-0 border-8 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
-          </div>
-          <p className="text-2xl font-bold text-blue-700">Carregando clientes...</p>
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Carregando clientes...</p>
         </div>
       </div>
     );
@@ -120,6 +245,10 @@ function Clientes() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Notificacao />
+      <ModalConfirmacao />
+      
+      {/* Header */}
       <div className="bg-white shadow-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -142,7 +271,7 @@ function Clientes() {
               <span className="hidden sm:inline">Dashboard</span>
             </button>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => setShowSidePanel(true)}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-105"
             >
               <Plus className="w-5 h-5" />
@@ -152,196 +281,319 @@ function Clientes() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {clientes.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-20 text-center border border-blue-100">
-            <div className="w-28 h-28 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full mx-auto mb-8 flex items-center justify-center shadow-inner">
-              <Users className="w-14 h-14 text-blue-500" />
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Barra de pesquisa */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por nome, e-mail ou CPF..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Tabela ou Empty State */}
+        {clientesFiltrados.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-16 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <Users className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-3xl font-bold text-gray-800 mb-4">
-              Nenhum cliente cadastrado ainda
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
             </h3>
-            <p className="text-lg text-gray-600 mb-10 max-w-md mx-auto">
-              Comece agora mesmo adicionando seu primeiro cliente ao sistema
+            <p className="text-gray-500 mb-6">
+              {searchTerm 
+                ? 'Tente buscar com outros termos' 
+                : 'Comece adicionando seu primeiro cliente'}
             </p>
-            <button
-              onClick={() => setShowModal(true)}
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-            >
-              <Plus className="w-6 h-6" />
-              Adicionar Primeiro Cliente
-            </button>
+            {!searchTerm && (
+              <button
+                onClick={() => setShowSidePanel(true)}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                Adicionar Cliente
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-12">
-            {[...clientes]
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((cliente) => (
-                <div
-                  key={cliente.id}
-                  className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden border border-blue-100"
-                >
-                  <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-                  <div className="p-8">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center shadow-inner">
-                          <Users className="w-8 h-8 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-                            {cliente.name}
-                          </h3>
-                          <p className="text-sm text-gray-500">{cliente.email}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEdit(cliente)}
-                          className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all hover:scale-110"
-                          title="Editar"
-                        >
-                          <Edit2 className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(cliente.id)}
-                          className="p-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all hover:scale-110"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                      {cliente.phone && (
-                        <div className="flex items-center gap-3 text-gray-600">
-                          <Phone className="w-5 h-5 text-blue-500" />
-                          <span className="text-sm font-medium">{cliente.phone}</span>
-                        </div>
-                      )}
-                      {cliente.cpf && (
-                        <div className="flex items-center gap-3 text-gray-600">
-                          <FileText className="w-5 h-5 text-cyan-500" />
-                          <span className="text-sm font-medium">{cliente.cpf}</span>
-                        </div>
-                      )}
-                      {cliente.address && (
-                        <div className="flex items-center gap-3 text-gray-600">
-                          <MapPin className="w-5 h-5 text-indigo-500" />
-                          <span className="text-sm font-medium line-clamp-2">{cliente.address}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
-
-        {showModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-8 rounded-t-3xl shadow-xl">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-3xl font-bold">
-                      {editando ? "Editar Cliente" : "Novo Cliente"}
-                    </h2>
-                    <p className="text-blue-100 mt-1">
-                      {editando ? "Atualize os dados do cliente" : "Preencha todos os campos"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={resetForm}
-                    className="p-3 hover:bg-white/20 rounded-2xl transition-all hover:rotate-90"
-                  >
-                    <X className="w-7 h-7" />
-                  </button>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Nome completo *</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
-                      placeholder="João Silva"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">E-mail *</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                      className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
-                      placeholder="joao@exemplo.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Telefone</label>
-                    <input
-                      type="text"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
-                      placeholder="(11) 98765-4321"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">CPF</label>
-                    <input
-                      type="text"
-                      value={formData.cpf}
-                      onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                      className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
-                      placeholder="123.456.789-00"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Endereço completo</label>
-                  <textarea
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    rows={3}
-                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all resize-none"
-                    placeholder="Rua Exemplo, 123 - Bairro - Cidade/SP"
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-6">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="flex-1 px-8 py-5 border-2 border-gray-300 text-gray-700 rounded-2xl font-bold hover:bg-gray-50 transition-all hover:scale-105"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-8 py-5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-2xl font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-                  >
-                    {editando ? "Atualizar Cliente" : "Cadastrar Cliente"}
-                  </button>
-                </div>
-              </form>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Cliente
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Contato
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      CPF
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Endereço
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {clientesFiltrados
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((cliente) => (
+                      <tr key={cliente.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">
+                                {cliente.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {cliente.name} {cliente.last_name}
+                              </div>
+                              <div className="text-sm text-gray-500">{cliente.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {cliente.phone ? (
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Phone className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm">{cliente.phone}</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {cliente.cpf ? (
+                            <span className="text-sm text-gray-700">{cliente.cpf}</span>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {cliente.address ? (
+                            <div className="text-sm text-gray-700 max-w-xs truncate">
+                              {cliente.address}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEdit(cliente)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Editar"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(cliente.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+        @keyframes scale-in {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        .animate-scale-in {
+          animation: scale-in 0.2s ease-out;
+        }
+      `}</style>
+
+      {/* Side Panel */}
+      {showSidePanel && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+            onClick={resetForm}
+          />
+          
+          {/* Panel */}
+          <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {editando ? 'Editar Cliente' : 'Novo Cliente'}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {editando ? 'Atualize as informações' : 'Preencha os dados do cliente'}
+                  </p>
+                </div>
+                <button
+                  onClick={resetForm}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Nome e Sobrenome */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="João"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sobrenome
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Silva"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  E-mail *
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="joao@exemplo.com"
+                  />
+                </div>
+              </div>
+
+              {/* Telefone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefone
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="(11) 98765-4321"
+                  />
+                </div>
+              </div>
+
+              {/* CPF */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CPF
+                </label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    value={formData.cpf}
+                    onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="123.456.789-00"
+                  />
+                </div>
+              </div>
+
+              {/* Endereço */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Endereço
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                  <textarea
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    rows={3}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    placeholder="Rua Exemplo, 123 - Bairro - Cidade/SP"
+                  />
+                </div>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  {editando ? 'Atualizar' : 'Cadastrar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   );
 }

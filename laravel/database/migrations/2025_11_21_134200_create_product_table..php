@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('product', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();                           // evita nome duplicado
+            $table->string('name')->unique();
             $table->text('description')->nullable();
+            $table->string('category')->nullable();
+            $table->string('unit')->nullable();
             $table->unsignedBigInteger('quantity')->default(0);
-            $table->decimal('cost_price', 14, 4)->default(0);           // mais precisão
+            $table->decimal('cost_price', 14, 4)->default(0);
             $table->decimal('sale_price', 14, 4)->default(0);
-            $table->boolean('active')->default(true);                   // para ativar/desativar produto
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

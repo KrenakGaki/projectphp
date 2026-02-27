@@ -4,27 +4,16 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class CustomerSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Faker::create('pt_BR');
+        DB::statement('TRUNCATE TABLE customer RESTART IDENTITY CASCADE');
 
-        for ($i = 0; $i < 150; $i++) {
-            Customer::create([
-                'name'    => $faker->name,
-                'email'   => $faker->unique()->safeEmail,
-                'cpf'     => $faker->unique()->cpf(false),
-                'phone'   => $faker->cellphoneNumber,
-                'address' => $faker->streetAddress . ', ' .
-                             $faker->city . ', ' .
-                             $faker->stateAbbr . ' - ' .
-                             $faker->postcode,
-            ]);
-        }
+        Customer::factory()->count(50)->create();
 
-        $this->command->info('150 clientes criados');
+        $this->command->info('50 clientes criados!');
     }
 }

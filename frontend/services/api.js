@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://192.168.0.189:8000/api',
 
     headers: {
         'Content-Type': 'application/json',
@@ -9,7 +9,7 @@ const api = axios.create({
     },
 });
 
-// Adicionar token em todas as requisições
+// Adicionar token em todas as requisições189
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {

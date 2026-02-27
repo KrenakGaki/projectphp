@@ -467,7 +467,7 @@ const CarrinhoModal = ({ isOpen, onClose, carrinho, clienteSelecionado, clientes
       >
         <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-6 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-3">
-            <ShoppingCart className="w-8 h-8" />
+            <ShoppingCart className="w-10 h-10" />
             <div>
               <h2 className="text-2xl font-bold">Carrinho</h2>
               {carrinho.length > 0 && (

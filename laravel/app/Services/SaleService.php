@@ -3,14 +3,11 @@
 namespace App\Services;
 
 use App\Repositories\SaleRepository;
-use App\Models\Product;
-use App\Models\SaleProduct;
+use App\Repositories\ProductRepository;
 use App\Exceptions\ProductNotFoundException;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\SaleNotFoundException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
-
 
 class SaleService {
     
@@ -23,28 +20,42 @@ class SaleService {
         $this->productRepository = $productRepository;
     }
 
+    public function getAllSales()
+    {
+        return $this->saleRepository->getAll();
+    }
 
-    public function createSale(array $data, int $userId) {
+    public function getSaleById(int $id)
+    {
+        $sale = $this->saleRepository->findById($id);
+
+        if (!$sale) {
+            throw new SaleNotFoundException("Venda com ID {$id} não encontrada");
+        }
+
+        return $sale;
+    }
+
+    public function createSale(array $data, int $userId)
+    {
         DB::beginTransaction();
 
         try {
             $total = 0;
             $saleProductData = [];
 
-            $productIds = collect($data['products'])->pluck('product_id')->toArray();
+            $productIds = collect($data['product'])->pluck('id')->toArray();
+            $products = $this->productRepository->findManyByIds($productIds)->keyBy('id');
 
-            $products = $this->productRepository->findManyByIds($productIds);
-
-            foreach ($data['products'] as $item) {
-
-                $product = $products->get($item['product_id']);
+            foreach ($data['product'] as $item) {
+                $product = $products->get($item['id']);
 
                 if (!$product) {
-                    throw new ProductNotFoundException("Product with ID {$item['product_id']} not found");
+                    throw new ProductNotFoundException("Produto com ID {$item['id']} não encontrado");
                 }
 
-                if ($product->stock < $item['quantity']) {
-                    throw new InsufficientStockException("Insufficient stock for product: {$product->name}");
+                if ($product->quantity < $item['quantity']) {
+                    throw new InsufficientStockException("Estoque insuficiente para o produto: {$product->name}");
                 }
 
                 $price = $item['price'] ?? $product->price;
@@ -55,18 +66,17 @@ class SaleService {
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'price' => $price,
-                    'subtotal' => $subtotal
+                    'subtotal' => $subtotal,
+                    'sold_at' => now()
                 ];
 
-                $product->decrement('stock', $item['quantity']);
+                $product->decrement('quantity', $item['quantity']);
             }
 
             $sale = $this->saleRepository->create([
                 'customer_id' => $userId,
                 'total' => $total,
                 'status' => $data['status'] ?? 'completed',
-                'payment_method' => $data['payment_method'] ?? null,
-                'notes' => $data['notes'] ?? null
             ]);
 
             foreach ($saleProductData as $saleProduct) {
@@ -82,4 +92,33 @@ class SaleService {
             throw $e;
         }
     }
+
+    public function cancelSale(int $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $sale = $this->saleRepository->findById($id);
+
+            if (!$sale) {
+                throw new SaleNotFoundException("Venda com ID {$id} não encontrada");
+            }
+
+            
+            foreach ($sale->saleProducts as $saleProduct) {
+                $saleProduct->product->increment('quantity', $saleProduct->quantity);
+            }
+
+            $sale->update(['status' => 'cancelled']);
+
+            DB::commit();
+
+            return $sale;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
 }
