@@ -65,7 +65,7 @@ class SaleService {
                 $saleProductData[] = [
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
-                    'price' => $price,
+                    'sale_price' => $price,
                     'subtotal' => $subtotal,
                     'sold_at' => now()
                 ];

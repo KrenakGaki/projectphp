@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('customer_id')->constrained('customer')->onDelete('cascade');
             $table->decimal('total', 10, 2);
-            $table->timestamp('sold_at');
+            $table->timestamp('sold_at')->useCurrent();
             $table->timestamps();
         });
     }

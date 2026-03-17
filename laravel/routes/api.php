@@ -33,7 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('vendas', SaleController::class);
 
     // Users
+    Route::get('usuarios', [UserController::class, 'index']);
+    Route::get('usuarios/{usuario}', [UserController::class, 'show']);
     Route::middleware('check.admin')->group(function () {
-        Route::apiResource('usuarios', UserController::class);
+        Route::post('usuarios', [UserController::class, 'store']);
+        Route::put('usuarios/{usuario}', [UserController::class, 'update']);
+        Route::delete('usuarios/{usuario}', [UserController::class, 'destroy']);
+
     });
 });
