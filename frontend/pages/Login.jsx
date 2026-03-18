@@ -1,19 +1,20 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../context/AuthContext';
 import { LogIn } from 'lucide-react';
+import useAuth from '../context/AuthContext';
 
 function Login() {
-    const [email, setEmail] = useState('');
+    const [email,    setEmail]    = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
-    const navigate = useNavigate();
+    const [erro,     setErro]     = useState(''); 
+    const [loading,  setLoading]  = useState(false);
 
-    const handleSubmit = async (e) => {
+    const { login }  = useAuth();
+    const navigate   = useNavigate();
+
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
-        setError('');
+        setErro('');
         setLoading(true);
 
         try {
@@ -21,31 +22,30 @@ function Login() {
             navigate('/dashboard');
         } catch (err) {
             console.error('Erro completo:', err);
-            console.error('Response data:', err.response?.data);
-            
+
             if (err.response?.data?.errors) {
-                const errors = err.response.data.errors;
-                const firstError = Object.values(errors)[0][0];
-                setError(firstError);
+                const firstError = Object.values(err.response.data.errors)[0][0];
+                setErro(firstError);
             } else if (err.response?.data?.message) {
-                setError(err.response.data.message);
+                setErro(err.response.data.message);
             } else {
-                setError('Email ou senha incorretos');
+                setErro('Email ou senha incorretos');
             }
         } finally {
             setLoading(false);
         }
-    };
+    }, [email, password, login, navigate]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+
                 <div className="flex items-center justify-center mb-8">
                     <div className="bg-blue-500 p-3 rounded-full">
                         <LogIn className="w-8 h-8 text-white" />
                     </div>
                 </div>
-                
+
                 <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
                     Bem-vindo
                 </h2>
@@ -53,9 +53,9 @@ function Login() {
                     Faça login para continuar
                 </p>
 
-                {error && (
+                {erro && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                        <p className="text-sm">{error}</p>
+                        <p className="text-sm">{erro}</p>
                     </div>
                 )}
 
@@ -98,6 +98,7 @@ function Login() {
                         {loading ? 'Entrando...' : 'Entrar'}
                     </button>
                 </form>
+
             </div>
         </div>
     );

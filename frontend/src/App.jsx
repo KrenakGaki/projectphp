@@ -8,7 +8,6 @@ import Vendas from "../pages/Vendas";
 import Usuarios from "../pages/Usuarios";
 
 import PrivateRoute from "../components/PrivateRoute";
-import Layout from "../components/Layout";
 
 
 function App() {
@@ -21,6 +20,7 @@ function App() {
 
           {/*Rota bloqueada*/}
           <Route element={<PrivateRoute />}>
+
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/produtos" element={<Produtos />} />
